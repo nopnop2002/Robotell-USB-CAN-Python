@@ -15,7 +15,7 @@ So, I analyzed the communication message that flows through USB and created a ne
 - pyserial
 
 # How to use   
-'''
+```
 $ git clone https://github.com/nopnop2002/USB-CAN-Python
 $ cd USB-CAN-Python
 $ python ./usb-can.py --help
@@ -29,7 +29,7 @@ optional arguments:
                         can bit rate
   -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Set the logging level
-'''
+```
 
 - pot
   Communication port.   
