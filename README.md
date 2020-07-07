@@ -17,7 +17,7 @@ So, I analyzed the communication message that flows through USB and created a ne
 # How to use   
 ```
 $ git clone https://github.com/nopnop2002/Robotell-USB-CAN-Python
-$ cd USB-CAN-Python
+$ cd Robotell-USB-CAN-Python
 $ python ./usb-can.py --help
 usage: usb-can.py [-h] [-p PORT] [-s SPEED]
                   [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
