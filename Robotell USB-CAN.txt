@@ -1,0 +1,276 @@
+USB CAN Adapter Receive Format
+
+
+* Set Speed(1,000,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0x40
+c=0x42
+c=0x0F
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0x66
+c=0x55
+c=0x55
+
+
+* Set Speed(800,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0x00
+c=0x35
+c=0x0C
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0x16
+c=0x55
+c=0x55
+
+* Set Speed(500,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0x20
+c=0xA1
+c=0x07
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0x9D
+c=0x55
+c=0x55
+
+* Set Speed(400,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0x80
+c=0x1A
+c=0x06
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0x75
+c=0x55
+c=0x55
+
+
+* Set Speed(250,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0x90
+c=0xD0
+c=0x03
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0x38
+c=0x55
+c=0x55
+
+
+* Set Speed(125,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0x48
+c=0xE8
+c=0x01
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0x06
+c=0x55
+c=0x55
+
+
+* Set Speed(100,000bps)
+c=0xAA
+c=0xAA
+c=0xD0
+c=0xFE
+c=0xFF
+c=0x01
+c=0xA0
+c=0x86
+c=0x01
+c=0x00
+c=0x01
+c=0x02
+c=0x00
+c=0x00
+c=0x04
+c=0xFF
+c=0x01
+c=0x00
+c=0xFC
+c=0x55
+c=0x55
+
+* Send Data Frame
+[00] 0xAA : Start Mark[1]
+[01] 0xAA : Start mark[2]
+[02] 0x78 : Frame ID[3]
+[03] 0x56 : Frame ID[2]
+[04] 0x34 : Frame ID[1]
+[05] 0x12 : Frame ID[0]
+[06] 0x11 : Frame Data[0]
+[07] 0x22 : Frame Data[1]
+[08] 0x33 : Frame Data[2]
+[09] 0x44 : Frame Data[3]
+[10] 0x00 : Frame Data[4]
+[11] 0x00 : Frame Data[5]
+[12] 0x00 : Frame Data[6]
+[13] 0x00 : Frame Data[70]
+[14] c=04 : Frame Data Length
+[15] c=00 : Unkown
+[16] 0x01 : Frame type (0:Standard/1:Extended)
+[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[18] 0x3F : CRC
+[19] 0x55 :
+[20] 0x55 :
+[21] 0xF0 :
+
+
+USB CAN Adapter Transmit Format
+
+* Receive Frame
+AA AA 0F 00 00 10 10 11 12 13 14 15 00 00 06 00 01 00 95 55 55
+
+AA AA 00 01 00 00 10 11 12 13 14 15 00 00 06 00 00 00 76 55 55
+
+AA AA 00 00 00 10 10 11 12 13 14 15 16 00 07 00 01 00 9D 55 55 
+
+AA AA 01 01 00 00 10 11 12 13 14 15 16 00 07 00 00 00 8E 55 55 
+
+AA AA 01 00 00 10 10 11 12 13 14 15 16 17 08 00 01 00 B6 55 55 
+
+AA AA 02 01 00 00 10 11 12 13 14 15 16 17 08 00 00 00 A7 55 55 
+
+AA AA 02 00 00 10 10 11 12 13 14 15 16 00 00 00 01 01 99 55 55 
+
+AA AA 03 01 00 00 10 11 12 13 14 15 16 17 00 00 00 01 A1 55 55 
+
+AA AA 03 00 00 10 10 00 00 00 00 00 00 00 01 00 01 00 25 55 55 
+
+AA AA 04 01 00 00 10 00 00 00 00 00 00 00 01 00 00 00 16 55 55 
+
+AA AA 04 00 00 10 10 11 00 00 00 00 00 00 02 00 01 00 38 55 55 
+
+AA AA 05 01 00 00 10 11 00 00 00 00 00 00 02 00 00 00 29 55 55 
+
+AA AA 05 00 00 10 10 11 12 00 00 00 00 00 03 00 01 00 4C 55 55 
+
+AA AA 06 01 00 00 10 11 12 00 00 00 00 00 03 00 00 00 3D 55 55 
+
+AA AA 06 00 00 10 10 11 12 13 FF FF F8 00 04 00 01 00 57 55 55 
+
+AA AA 07 01 00 00 10 11 12 13 FF FF FF FF 04 00 00 00 4E 55 55 
+
+AA AA 07 00 00 10 10 11 12 13 14 00 00 00 05 00 01 00 77 55 55 
+
+AA AA 08 01 00 00 10 11 12 13 14 00 00 00 05 00 00 00 68 55 55 
+
+AA AA 08 00 00 10 10 11 12 13 14 15 00 00 06 00 01 00 8E 55 55 
+
+AA AA 09 01 00 00 10 11 12 13 14 15 00 00 06 00 00 00 7F 55 55 
+
+AA AA 09 00 00 10 10 11 12 13 14 15 16 00 07 00 01 00 A6 55 55 
+
+AA AA 0A 01 00 00 10 11 12 13 14 15 16 00 07 00 00 00 97 55 55 
+
+AA AA 0A 00 00 10 10 11 12 13 14 15 16 17 08 00 01 00 BF 55 55 
+
+AA AA 0B 01 00 00 10 11 12 13 14 15 16 17 08 00 00 00 B0 55 55 
+
+AA AA 0B 00 00 10 10 11 12 13 14 15 16 00 00 00 01 01 A2 55 55 
+
+*Transmit Packet is 21 Bytes
+
+[00] 0xAA : Start Mark[1]
+[01] 0xAA : Start mark[2]
+[02] 0x0B : Frame ID[3]
+[03] 0x00 : Frame ID[2]
+[04] 0x00 : Frame ID[1]
+[05] 0x10 : Frame ID[0]
+[06] 0x10 : Frame Data[0]
+[07] 0x11 : Frame Data[1]
+[08] 0x12 : Frame Data[2]
+[09] 0x13 : Frame Data[3]
+[10] 0x14 : Frame Data[4]
+[11] 0x15 : Frame Data[5]
+[12] 0x16 : Frame Data[6]
+[13] 0x00 : Frame Data[7]
+[14] 0x00 : Frame Data Length
+[15] 0x00 : Unkown
+[16] 0x01 : Frame type (0:Standard/1:Extended)
+[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[18] 0xA2 : CRC(8 bits)
+[19] 0x55 : End Mark[0]
+[20] 0x55 : End mark[1]
+
+*CRC calcurate
+Simple addition
+
+          |------------------------------------------------------| Range of CRC
+[170, 170, 7, 1, 0, 0, 16, 17, 18, 19, 20, 21, 22, 23, 8, 0, 0, 0, 172, 85, 85]
+
