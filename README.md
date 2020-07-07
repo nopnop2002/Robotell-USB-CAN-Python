@@ -31,16 +31,16 @@ optional arguments:
                         Set the logging level
 ```
 
-- pot
+- pot   
   Communication port.   
   Default is /dev/ttyUSB0.   
 
-- speed
+- speed   
   CAN bit rate.   
   Default is 500Kbps.   
   Supporting speed is 1M/800K/500K/400K/250K/125K/100K.   
 
-- log
+- log   
   Log level.   
   Default is WARNING.   
 
