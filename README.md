@@ -52,10 +52,10 @@ optional arguments:
 # Sending data   
 This tool accepts data to send via UDP Broadcast.   
 
-'''
+```
 $ chmod 777 transmit.sh
 $ ./transmit.sh
-'''
+```
 
 # Running on Ubuntu 18.04.4
 ![USBCAN-python-1](https://user-images.githubusercontent.com/6020549/86798048-55399880-c0ab-11ea-844d-5823554deff7.jpg)
