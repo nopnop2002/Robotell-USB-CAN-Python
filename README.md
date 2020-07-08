@@ -49,4 +49,4 @@ optional arguments:
 ![USBCAN-python-1](https://user-images.githubusercontent.com/6020549/86798048-55399880-c0ab-11ea-844d-5823554deff7.jpg)
 
 # Running on Windows10
-![USBCAN-python-Windows](https://user-images.githubusercontent.com/6020549/86865208-88127980-c109-11ea-8328-7a283f4c1d07.jpg)
+![USBCAN-python-Windows](https://user-images.githubusercontent.com/6020549/86865476-053dee80-c10a-11ea-8656-e25e4600446a.jpg)
