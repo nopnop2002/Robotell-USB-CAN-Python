@@ -51,7 +51,7 @@ optional arguments:
 
 # Sending data   
 This tool accepts data to send via UDP Broadcast.   
-
+Open a new terminal and execute the following command:   
 ```
 $ chmod 777 transmit.sh
 $ ./transmit.sh
