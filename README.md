@@ -6,8 +6,8 @@ Python program for Robotell USB-CAN Adapter
 I've bought a Robotell USB-CAN Adapter from AliExpress.   
 ![USB-CAN Adapter](https://user-images.githubusercontent.com/6020549/86798040-52d73e80-c0ab-11ea-802c-93aa918e1067.JPG)
 
-The Windows application is published [here](https://github.com/TheRaptus/USB-CAN-Adapter).   
-But in my environment only speed setting and CAN-FRAME transmission worked, CAN-FRAME reception did not work.
+The Windows application is published [here](https://www.amobbs.com/thread-4651667-1-1.html).   
+The link described as "ourdev_627692IXWNNX.rar" in the page is the Windows application.   
 
 So, I analyzed the communication message that flows through USB and created a new one in Python.
 
