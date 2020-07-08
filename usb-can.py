@@ -1,9 +1,68 @@
 import sys
+import time
 import serial
 import struct
 import logging
 import Colorer
 import argparse
+from socket import socket, AF_INET, SOCK_DGRAM
+import threading
+import json
+
+# Timer Thread
+class TimerThread(threading.Thread):
+    def __init__(self, ACTIVE, INTERVAL):
+        threading.Thread.__init__(self)
+        self.timerFlag = False
+        self.interval = INTERVAL
+        self.active = ACTIVE
+
+    def run(self):
+        while True:
+            #print("Timer={} active={}".format(time.time(), self.active))
+            if self.active == True: self.timerFlag = True
+            time.sleep(self.interval)
+
+# UDP Receive Thread
+class ServerThread(threading.Thread):
+    def __init__(self, PORT):
+        threading.Thread.__init__(self)
+        # line information
+        self.HOST = ""
+        self.PORT = PORT
+        self.BUFSIZE = 1024
+        self.ADDR = ("", self.PORT)
+
+        # bind
+        self.udpServSock = socket(AF_INET, SOCK_DGRAM)
+        self.udpServSock.bind(self.ADDR)      
+        self.request = False
+
+    def run(self):
+        while True:
+            try:
+                packet, self.addr = self.udpServSock.recvfrom(self.BUFSIZE) # Receive Data
+                logging.debug("recvfrom packet={}".format(packet))
+                self.packet = packet.decode()                
+                json_dict = json.loads(self.packet) # If parsing fails, go to exception
+                logging.debug("json_dict={}".format(json_dict))
+                self.id = json_dict["id"]
+                self.type = json_dict["type"]
+                logging.debug("self.id={} self.type={}".format(self.id, self.type))
+                if (self.type == "stdData"):
+                    self.data = json_dict["data"]
+                    logging.debug("self.data={} len={}".format(self.data, len(self.data)))
+                    self.request = True
+                if (self.type == "extData"):
+                    self.data = json_dict["data"]
+                    logging.debug("self.data={} len={}".format(self.data, len(self.data)))
+                    self.request = True
+                if (self.type == "stdRemote"): self.request = True
+                if (self.type == "extRemote"): self.request = True
+            except:
+                logging.error("json parse fail {}".format(self.packet))
+                pass
+
 
 class ParseClass(object):
     def __init__(self):
@@ -50,7 +109,7 @@ class ParseClass(object):
             self.buffer.append(ch)
             if (len(self.buffer) == 21):
                 if (ch == 0x55):
-                    logging.info("self.buffer={}".format(self.buffer))
+                    logging.debug("self.buffer={}".format(self.buffer))
                     crc = sum(self.buffer[2:18]) & 0xff
                     logging.debug("crc={}".format(crc))
                     #crc = crc & 0xff
@@ -67,8 +126,34 @@ class ParseClass(object):
                         self.status = 0
             return []
            
+def setMsg(id, rtr, ext, len, buf):
+    sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
+    idStr = "{:08x}".format(id)
+    logging.debug("idStr={}".format(idStr))
+    if (ext == 0):
+        sendData[2] = int(idStr[6:8],16)
+        sendData[3] = int(idStr[4:6],16) & 0x7
+        sendData[4] = 0
+        sendData[5] = 0
+        logging.debug("id={:02x}{:02x}".format(sendData[2], sendData[3]))
+    else:
+        sendData[2] = int(idStr[6:8],16)
+        sendData[3] = int(idStr[4:6],16)
+        sendData[4] = int(idStr[2:4],16)
+        sendData[5] = int(idStr[0:2],16) & 0x1F
+        logging.debug("id={:02x}{:02x}".format(sendData[2], sendData[3]))
+    for x in range(len):
+        sendData[x+6] = buf[x]
+    sendData[14] = len # Frame Data Length
+    sendData[16] = ext # Standard/Extended frame
+    sendData[17] = rtr # Data/Request frame
+    sendData[18] = sum(sendData[2:18]) & 0xff
+    logging.debug("crc={:2x}".format(sendData[18]))
+    logging.debug("sendData={}".format(sendData))
+    return sendData
+
 # https://qiita.com/mml/items/ccc66ecc46d8299b3346
-def send( buf ):
+def sendMsg( buf ):
       while True:
             if ser.out_waiting == 0:
                   break
@@ -95,25 +180,25 @@ def setSpeed(speed):
 
 
      if (speed == 1000000):
-         send(speed1000)
+         sendMsg(speed1000)
          return True
      elif (speed == 800000):
-         send(speed800)
+         sendMsg(speed800)
          return True
      elif (speed == 500000):
-         send(speed500)
+         sendMsg(speed500)
          return True
      elif (speed == 400000):
-         send(speed400)
+         sendMsg(speed400)
          return True
      elif (speed == 250000):
-         send(speed250)
+         sendMsg(speed250)
          return True
      elif (speed == 125000):
-         send(speed125)
+         sendMsg(speed125)
          return True
      elif (speed == 100000):
-         send(speed100)
+         sendMsg(speed100)
          return True
      else:
          return False
@@ -121,7 +206,7 @@ def setSpeed(speed):
     
 
 def printData(buffer):
-     logging.info("buffer={}".format(buffer))
+     logging.debug("buffer={}".format(buffer))
      if (buffer[16] == 0):
           message = "Standard ID: 0x"
           message = message + "{:01x}".format(buffer[3]).upper()
@@ -153,17 +238,23 @@ format="%(asctime)s [%(filename)s:%(lineno)d] %(levelname)-8s %(message)s"
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--port", help="open port")
 parser.add_argument("-s", "--speed", help="can bit rate", type=int)
+parser.add_argument("-u", "--udp", help="UDP receive port", type=int)
 parser.add_argument("-l", "--log", dest="logLevel", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help="Set the logging level")
 
 args = parser.parse_args()
 device = "/dev/ttyUSB0"
 speed = 500000
+udpPort = 8200
+
 if args.port:
     print("args.port={}".format(args.port))
     device = args.port
 if args.speed:
     print("args.speed={}".format(args.speed))
     speed = args.speed
+if args.udp:
+    print("args.udp={}".format(args.udp))
+    udpPort = args.udp
 if args.logLevel:
     level=getattr(logging, args.logLevel)
     print("logLevel set to {}".format(level))
@@ -202,10 +293,71 @@ if (setSpeed(speed) == False):
     logging.error("This speed {} is not supported.".format(speed))
     sys.exit()
 
+# Start Timer thread
+timer = TimerThread(ACTIVE=True, INTERVAL=5)
+timer.setDaemon(True)
+timer.start()
+
+# Start UDP Receive hread
+#udp = ServerThread(PORT=8200)
+udp = ServerThread(PORT=udpPort)
+udp.setDaemon(True)
+udp.start()
+
+
 buffer = []
 parse = ParseClass()
 
 while True:
+    if timer.timerFlag is True:
+        logging.debug("timeFlag")
+        timer.timerFlag = False
+        """
+        sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
+        sendData[16] =1 # Standard frame
+        sendData[17] =0 # Data frame
+        sendData[18] = sum(sendData[2:18]) & 0xff
+        print("sendData[18]={:2x}".format(sendData[18]))
+        frameId = 0xF23
+        frameRequest = 0
+        frameType = 1
+        frameLength = 4
+        frameData = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88]
+        sendData = setMsg(frameId, frameRequest, frameType, frameLength, frameData)
+        sendMsg(sendData)
+        """
+
+    if udp.request is True:
+        logging.debug("udp request")
+        logging.debug("id={} type={}".format(udp.id, udp.type))
+        frameId = int(udp.id, 16)
+        logging.debug("frameId={:x}".format(frameId))
+        if (udp.type == "stdData"):
+            frameRequest = 0
+            frameType = 0
+            frameLength = len(udp.data)
+        if (udp.type == "extData"):
+            frameRequest = 0
+            frameType = 1
+            frameLength = len(udp.data)
+        if (udp.type == "stdRemote"):
+            frameRequest = 1
+            frameType = 0
+            frameLength = 0
+        if (udp.type == "extRemote"):
+            frameRequest = 1
+            frameType = 1
+            frameLength = 0
+        frameData = []
+        for x in range(frameLength):
+            logging.debug("udp.data={}".format(udp.data[x]))
+            frameData.append(udp.data[x])
+        logging.debug("frameData={}".format(frameData))
+        sendData = setMsg(frameId, frameRequest, frameType, frameLength, frameData)
+        sendMsg(sendData)
+        logging.info("Transmit={}".format(sendData))
+        udp.request = False
+
     if ser.in_waiting > 0:
         recv_data = ser.read(1)
         #print(type(recv_data))
@@ -219,7 +371,7 @@ while True:
 
         buffer = parse.parseData(b)
         if (len(buffer) > 0):
-            logging.info("buffer={}".format(buffer))
+            logging.info("Receive={}".format(buffer))
             printData(buffer)
 
 
