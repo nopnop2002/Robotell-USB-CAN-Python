@@ -1,6 +1,8 @@
 USB CAN Adapter Receive Format
 
-* Read MCU Information
+* Inquiry about MCU side information
+Inquire using the following CAN-ID.
+
 #define CAN_BAUDRATE_ID 	0x01fffed0
 #define CAN_CPU_INFO0_ID	0x01fffff0
 #define CAN_CPU_INFO1_ID	(CAN_CPU_INFO0_ID + 1)
@@ -10,10 +12,10 @@ USB CAN Adapter Receive Format
 
 c=0xAA
 c=0xAA
-c=0xD0 : ID[3]
-c=0xFE : ID[2]
-c=0xFF : ID[1]
-c=0x01 : ID[0]
+c=0xD0 : Inquire-ID[3]
+c=0xFE : Inquire-ID[2]
+c=0xFF : Inquire-ID[1]
+c=0x01 : Inquire-ID[0]
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
@@ -25,7 +27,7 @@ c=0x00 : Not use
 c=0x00 : Not use
 c=0xFF
 c=0x01 : Must be 0x01
-c=0x00 : Request Type(0:Set/1:Read)
+c=0x00 : Request Type(0:Set/1:Inquiry)
 c=0x66 : CRC
 c=0x55
 c=0x55
