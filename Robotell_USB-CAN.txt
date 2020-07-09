@@ -277,7 +277,7 @@ c=0x55
 
 
 
-* Serial Receive Frame
+* Serial Receive Format
 [00] 0xAA : Start Mark[1]
 [01] 0xAA : Start mark[2]
 [02] 0x78 : Frame ID << 0
@@ -301,8 +301,8 @@ c=0x55
 [20] 0x55 :
 
 
-* Receive Frame example
-Example
+* Receive example
+
 [AA AA 02 01 00 00 01 02 00 00 00 00 00 00 02 00 00 00 FF 55 55]
 ID = 0x00000102
 Data = 01 02 00 00 00 00 00 00
@@ -372,23 +372,24 @@ FrameCtrl is not included in crc calculation.
 [03] 0x00 : Frame ID[2]
 [04] 0x00 : Frame ID[1]
 [05] 0x10 : Frame ID[0]
-[06] 0xA5 : FrameCtrl   ---> Inserted (not included in crc calculation)
+[06] 0xA5 : FrameCtrl      ---> Inserted (not included in crc calculation)
 [07] 0x55 : Frame Data[0]  ---> Ctrl Code
 [08] 0x11 : Frame Data[1]
 [09] 0x12 : Frame Data[2]
-[10] 0x13 : Frame Data[3]
-[11] 0x14 : Frame Data[4]
-[12] 0x15 : Frame Data[5]
-[13] 0x16 : Frame Data[6]
-[14] 0x00 : Frame Data[7]
-[15] 0x00 : Frame Data Length
-[16] 0x00 : Unkown
-[17] 0x01 : Frame type (0:Standard/1:Extended)
-[18] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[10] 0xA5 : FrameCtrl      ---> Inserted (not included in crc calculation)
+[11] 0xAA : Frame Data[3]  ---> Ctrl Code
+[12] 0x14 : Frame Data[4]
+[13] 0x15 : Frame Data[5]
+[14] 0x16 : Frame Data[6]
+[15] 0x00 : Frame Data[7]
+[16] 0x00 : Frame Data Length
+[17] 0x00 : Unkown
+[18] 0x01 : Frame type (0:Standard/1:Extended)
+[19] 0x01 : Request Type (0:Data frame/1:Remote request frame)
 ---- End of CRC Calculate ----
-[19] 0xA2 : CRC(8 bits)
-[20] 0x55 : End Mark[0]
-[21] 0x55 : End mark[1]
+[20] 0xA2 : CRC(8 bits)
+[21] 0x55 : End Mark[0]
+[22] 0x55 : End mark[1]
 
 Example
 [AA AA 02 01 00 00 A5 A5 A5 55 00 00 00 00 00 00 02 00 00 00 FF 55 55]
@@ -418,8 +419,8 @@ Type = Standard
 [16] 0x01 : Frame type (0:Standard/1:Extended)
 [17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
 ---- End of CRC Calculate ----
-[18] 0xA5 : FrameCtrl  ---> Inserted
-[19] 0xA5 : CRC(8 bits)  ---> Ctrl Code
+[18] 0xA5 : FrameCtrl    ---> Inserted
+[19] 0xA5 : CRC(8 bits)  ---> Real CRC
 [20] 0x55 : End Mark[0]
 [21] 0x55 : End mark[1]
 
