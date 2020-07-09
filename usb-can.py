@@ -77,6 +77,7 @@ class ParseClass(object):
             if (ch == 0xAA):
                 self.status = 1
                 self.buffer = []
+                self.crc = 0
                 self.buffer.append(ch)
                 #print("self.buffer={}".format(self.buffer))
             return []
@@ -94,36 +95,62 @@ class ParseClass(object):
 
         elif (self.status == 2):
             #print("self.status == 2")
-            self.buffer.append(ch)
             #print("self.buffer={}".format(self.buffer))
-            if (len(self.buffer) == 20):
-                if (ch == 0x55):
+            if (len(self.buffer) == 18):
+                if (ch == 0xA5):
                     self.status = 3
                 else:
-                    logging.warning("invalid Packet (status=2)")
-                    self.status = 0
+                    self.crc = self.crc & 0xff
+                    #print("self.crc={:x} ch={:x}".format(self.crc,ch))
+                    if (self.crc != ch):
+                        logging.warning("Invalid CRC {:02x} {:02x}".format(self.crc, ch))
+                        self.status = 0
+                    else:
+                        self.status = 4
+                        self.buffer.append(ch)
+            else:
+                self.crc = self.crc + ch
+                self.buffer.append(ch)
             return []
 
         elif (self.status == 3):
             #print("self.status == 3")
-            self.buffer.append(ch)
-            if (len(self.buffer) == 21):
-                if (ch == 0x55):
+            self.crc = self.crc & 0xff
+            #print("self.crc={:x} ch={:x}".format(self.crc,ch))
+            if (self.crc != ch):
+                logging.warning("Invalid CRC {:02x} {:02x}".format(self.crc, ch))
+                self.status = 0
+            else:
+                self.status = 4
+                self.buffer.append(ch)
+            return []
+
+
+        elif (self.status == 4):
+            #print("self.status == 4")
+            if (ch == 0x55):
+                self.buffer.append(ch)
+                self.status = 9
+            else:
+                logging.warning("invalid Packet (status=4)")
+                self.status = 0
+            return []
+
+        elif (self.status == 9):
+            #print("self.status == 9")
+            if (ch == 0x55):
+                self.buffer.append(ch)
+                self.status = 9
+                if (len(self.buffer) == 21):
                     logging.debug("self.buffer={}".format(self.buffer))
-                    crc = sum(self.buffer[2:18]) & 0xff
-                    logging.debug("crc={}".format(crc))
-                    #crc = crc & 0xff
-                    #logging.debug("crc={}".format(crc))
-                    if (crc == self.buffer[18]):
-                        logging.debug("CRC ok")
-                        self.status = 0
-                        return self.buffer
-                    else:
-                        logging.warning("Invalid CRC {:02x} {:02x}".format(crc, self.buffer[18]))
-                        self.status = 0
+                    self.status = 0
+                    return self.buffer
                 else:
-                        logging.warning("invalid Packet (status=3)")
-                        self.status = 0
+                    logging.warning("invalid Packet (status=9)")
+                    self.status = 0
+            else:
+                logging.warning("invalid Packet (status=3)")
+                self.status = 0
             return []
            
 def setMsg(id, rtr, ext, len, buf):
