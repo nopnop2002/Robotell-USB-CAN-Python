@@ -12,10 +12,10 @@ Inquire using the following CAN-ID.
 
 c=0xAA
 c=0xAA
-c=0xD0 : Inquire-ID[3]
-c=0xFE : Inquire-ID[2]
-c=0xFF : Inquire-ID[1]
-c=0x01 : Inquire-ID[0]
+c=0xD0 : Inquire-ID & 0xff
+c=0xFE : Inquire-ID & 0xFF00 >> 8
+c=0xFF : Inquire-ID & 0xFF0000 >> 16
+c=0x01 : Inquire-ID & 0xFF000000 >> 24
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
@@ -231,14 +231,14 @@ c=0x55
 [03] 0x00
 [04] 0x00
 [05] 0x00
-[06] 0x0F : Mask_id << 0
-[07] 0x01 : Mask_id << 8
-[08] 0x00 : Mask_id << 16
-[09] 0x80 : Mask_id << 24 + Enable(0x80)
-[10] 0x10 : Mask << 0
-[11] 0x0F : Mask << 8
-[12] 0x00 : Mask << 16
-[13] 0x00 : Mask << 24
+[06] 0x0F : Mask_id & 0xFF
+[07] 0x01 : Mask_id & 0xFF00 >> 8
+[08] 0x00 : Mask_id & 0xFF0000 >> 16
+[09] 0x80 : Mask_id & 0xFF000000 >> 24 + Enable(0x80)
+[10] 0x10 : Mask & 0xFF
+[11] 0x0F : Mask & 0xFF00 >> 8
+[12] 0x00 : Mask & 0xFF0000 >> 16
+[13] 0x00 : Mask & 0xFF000000 >> 24
 [14] 0x08 : Frame Data Length
 [15] 0x00 : Unkown
 [16] 0x01 : Frame type (0:Standard/1:Extended)
@@ -258,14 +258,14 @@ c=0x55
 [03] 0x00
 [04] 0x00
 [05] 0x00
-[06] 0x78 : Mask_id << 0
-[07] 0x56 : Mask_id << 8
-[08] 0x34 : Mask_id << 16
-[09] 0x12 : Mask_id << 24 + Enable(0x80)
-[10] 0x78 : Mask << 0
-[11] 0x56 : Mask << 8
-[12] 0x34 : Mask << 16
-[13] 0x12 : Mask << 24 + Extende(0x40)
+[06] 0x78 : Mask_id & 0xFF
+[07] 0x56 : Mask_id & 0xFF00 >> 8
+[08] 0x34 : Mask_id & 0xFF0000 >> 16
+[09] 0x12 : Mask_id & 0xFF000000 >> 24 + Enable(0x80)
+[10] 0x78 : Mask & 0xFF
+[11] 0x56 : Mask & 0xFF00 >> 8
+[12] 0x34 : Mask & 0xFF0000 >> 16
+[13] 0x12 : Mask & 0xFF000000 >> 24 + Extende(0x40)
 [14] 0x08 : Frame Data Length
 [15] 0x00 : Unkown
 [16] 0x01 : Frame type (0:Standard/1:Extended)
