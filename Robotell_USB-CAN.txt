@@ -7,8 +7,10 @@ Inquire using the following CAN-ID.
 #define CAN_CPU_INFO0_ID	0x01fffff0
 #define CAN_CPU_INFO1_ID	(CAN_CPU_INFO0_ID + 1)
 #define CAN_VERSION_ID		0x01ffffe0
+#define CAN_INIT_ID				0x01fffeff // Clean Flash(500,000 bps/mask 0x0000)
 #define CAN_ABOM_ID				0x01fffeb0
 #define CAN_ART_ID				0x01fffea0
+#define CAN_RESET_ID			0x01fffec0 // Reset
 
 c=0xAA
 c=0xAA
