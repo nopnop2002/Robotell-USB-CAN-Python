@@ -103,14 +103,17 @@ class ParseClass(object):
                     self.crc = self.crc & 0xff
                     #print("self.crc={:x} ch={:x}".format(self.crc,ch))
                     if (self.crc != ch):
-                        logging.warning("Invalid CRC {:02x} {:02x}".format(self.crc, ch))
+                        logging.warning("Invalid CRC(status=2) {:02x} {:02x} {}".format(self.crc, ch, self.buffer))
                         self.status = 0
                     else:
-                        self.status = 4
+                        self.status = 8
                         self.buffer.append(ch)
             else:
-                self.crc = self.crc + ch
-                self.buffer.append(ch)
+                if (ch == 0xA5):
+                    self.status = 4
+                else:
+                    self.crc = self.crc + ch
+                    self.buffer.append(ch)
             return []
 
         elif (self.status == 3):
@@ -118,16 +121,22 @@ class ParseClass(object):
             self.crc = self.crc & 0xff
             #print("self.crc={:x} ch={:x}".format(self.crc,ch))
             if (self.crc != ch):
-                logging.warning("Invalid CRC {:02x} {:02x}".format(self.crc, ch))
+                logging.warning("Invalid CRC(status=3) {:02x} {:02x} {}".format(self.crc, ch, self.buffer))
                 self.status = 0
             else:
-                self.status = 4
+                self.status = 8
                 self.buffer.append(ch)
             return []
 
-
         elif (self.status == 4):
             #print("self.status == 4")
+            self.crc = self.crc + ch
+            self.buffer.append(ch)
+            self.status = 2
+            return []
+
+        elif (self.status == 8):
+            #print("self.status == 8")
             if (ch == 0x55):
                 self.buffer.append(ch)
                 self.status = 9
@@ -153,7 +162,8 @@ class ParseClass(object):
                 self.status = 0
             return []
            
-def setMsg(id, rtr, ext, len, buf):
+# This is old version
+def _setMsg(id, rtr, ext, len, buf):
     sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
     idStr = "{:08x}".format(id)
     logging.debug("idStr={}".format(idStr))
@@ -175,7 +185,81 @@ def setMsg(id, rtr, ext, len, buf):
     sendData[16] = ext # Standard/Extended frame
     sendData[17] = rtr # Data/Request frame
     sendData[18] = sum(sendData[2:18]) & 0xff
-    logging.debug("crc={:2x}".format(sendData[18]))
+    print("old:crc={:2x}".format(sendData[18]))
+    print("old:sendData={}".format(sendData))
+    return sendData
+
+USART_FRAMECTRL = 0xA5                                                  
+USART_FRAMEHEAD = 0xAA
+USART_FRAMETAIL = 0x55
+
+def insertCtrl(buffer, ch):
+    result = buffer
+    #print("insertCtrl ch={:02x}".format(ch))
+    if (ch == USART_FRAMECTRL or ch == USART_FRAMEHEAD or ch == USART_FRAMETAIL):
+        result.append(USART_FRAMECTRL)
+    return result
+       
+
+def setMsg(id, rtr, ext, len, buf):
+    #sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
+    #print("sendData={}".format(sendData))
+
+    sendData = [0xAA, 0xAA]
+    idStr = "{:08x}".format(id)
+    logging.debug("idStr={}".format(idStr))
+    crc = 0
+    if (ext == 0):
+        id = int(idStr[6:8],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[4:6],16) & 0x7
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        sendData.append(0)
+        sendData.append(0)
+        logging.debug("id={:02x}{:02x}".format(sendData[2], sendData[3]))
+    else:
+        id = int(idStr[6:8],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[4:6],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[2:4],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[0:2],16) & 0x1F
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        logging.debug("id={:02x}{:02x}".format(sendData[2], sendData[3]))
+    for x in range(len):
+        sendData = insertCtrl(sendData, buf[x])
+        sendData.append(buf[x])
+        crc = crc + buf[x]
+    if (len < 8):
+        for x in range(8-len):
+            sendData.append(0)
+    sendData.append(len) # Frame Data Length
+    crc = crc + len
+    sendData.append(0)
+    sendData.append(ext) # Standard/Extended frame
+    crc = crc + ext
+    sendData.append(rtr) # Data/Request frame
+    crc = crc + rtr
+    crc = crc &0xff
+    logging.debug("crc={:2x}".format(crc))
+    sendData = insertCtrl(sendData, crc)
+    sendData.append(crc)
+    sendData.append(0x55)
+    sendData.append(0x55)
+    #sendData.append(0xF0)
     logging.debug("sendData={}".format(sendData))
     return sendData
 
@@ -189,6 +273,33 @@ def sendMsg( buf ):
             ser.write(a)
       ser.flush()
          
+def readInfo():
+     data0 = [0xAA, 0xAA, 0xE0, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+     data1 = [0xAA, 0xAA, 0xF0, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+     data2 = [0xAA, 0xAA, 0xF1, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+     data3 = [0xAA, 0xAA, 0xB0, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+     data4 = [0xAA, 0xAA, 0xA0, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+
+     data0[18]=sum(data0[2:18]) & 0xFF
+     #print("data0[18]={:02x}".format(data0[18]))
+     sendMsg(data0)
+
+     data1[18]=sum(data1[2:18]) & 0xFF
+     #print("data1[18]={:2x}".format(data1[18]))
+     sendMsg(data1)
+
+     data2[18]=sum(data2[2:18]) & 0xFF
+     #print("data2[18]={:2x}".format(data2[18]))
+     sendMsg(data2)
+
+     data3[18]=sum(data3[2:18]) & 0xFF
+     #print("data3[18]={:2x}".format(data3[18]))
+     sendMsg(data3)
+
+     data4[18]=sum(data4[2:18]) & 0xFF
+     #print("data4[18]={:2x}".format(data4[18]))
+     sendMsg(data4)
+
 def setSpeed(speed):
      logging.info("speed={}".format(speed))
      speed1000 = [0xAA, 0xAA, 0xD0, 0xFE, 0xFF, 0x01, 0x40, 0x42, 0x0F, 0x00, 0x01, 0x02, 0x00, 0x00, 0x04, 0xFF, 0x01, 0x00, 0x66, 0x55, 0x55]
@@ -231,30 +342,65 @@ def setSpeed(speed):
          return False
 
     
+def printInfo(header, buffer):
+     message = header
+     message = message + "["
+     for x in range(len(buffer)):
+        message = message + "{:02x}".format(buffer[x]).upper()
+        if (x != len(buffer)-1): message = message + " "
+     message = message + "]"
+     logging.info(message)
 
 def printData(buffer):
      logging.debug("buffer={}".format(buffer))
-     if (buffer[16] == 0):
-          message = "Standard ID: 0x"
-          message = message + "{:01x}".format(buffer[3]).upper()
-          message = message + "{:02x}".format(buffer[2]).upper()
-          message = message + "       DLC: "
+     if (buffer[15] == 0xFF):
+         systemId = (buffer[5] << 24) + (buffer[4] << 16) + (buffer[3] << 8) + buffer[2]
+         logging.debug("systemId={:x}".format(systemId))
+         if (systemId == 0x01ffffe0):
+             message = "VERSION  ID: 0x"
+         if (systemId == 0x01fffff0):
+             message = "CPUINFO0 ID: 0x"
+         if (systemId == 0x01fffff1):
+             message = "CPUINFO1 ID: 0x"
+         if (systemId == 0x01fffeb0):
+             message = "ABOM     ID: 0x"
+         if (systemId == 0x01fffea0):
+             message = "ART      ID: 0x"
+         if (systemId == 0x01fffed0):
+             message = "BAUDRATE ID: 0x"
+         message = message + "{:02x}".format(buffer[5]).upper()
+         message = message + "{:02x}".format(buffer[4]).upper()
+         message = message + "{:02x}".format(buffer[3]).upper()
+         message = message + "{:02x}".format(buffer[2]).upper()
+         message = message + "  DLC: "
+         message = message + "{:01n}".format(buffer[14])
+         message = message + "  Data:"
+         for x in range(buffer[14]):
+             #print ("x={}".format(x))
+             message = message + " 0x"
+             message = message + "{:02x}".format(buffer[x+6]).upper()
      else:
-          message = "Extended ID: 0x"
-          message = message + "{:02x}".format(buffer[5]).upper()
-          message = message + "{:02x}".format(buffer[4]).upper()
-          message = message + "{:02x}".format(buffer[3]).upper()
-          message = message + "{:02x}".format(buffer[2]).upper()
-          message = message + "  DLC: "
-     message = message + "{:01n}".format(buffer[14])
-     message = message + "  Data:"
-     if (buffer[17] == 0):
-          for x in range(buffer[14]):
-              #print ("x={}".format(x))
-              message = message + " 0x"
-              message = message + "{:02x}".format(buffer[x+6]).upper()
-     else:
-         message = message + " REMOTE REQUEST FRAME"
+         if (buffer[16] == 0):
+             message = "Standard ID: 0x"
+             message = message + "{:01x}".format(buffer[3]).upper()
+             message = message + "{:02x}".format(buffer[2]).upper()
+             message = message + "       DLC: "
+         else:
+             message = "Extended ID: 0x"
+             message = message + "{:02x}".format(buffer[5]).upper()
+             message = message + "{:02x}".format(buffer[4]).upper()
+             message = message + "{:02x}".format(buffer[3]).upper()
+             message = message + "{:02x}".format(buffer[2]).upper()
+             message = message + "  DLC: "
+         message = message + "{:01n}".format(buffer[14])
+         message = message + "  Data:"
+         if (buffer[17] == 0):
+             for x in range(buffer[14]):
+                 #print ("x={}".format(x))
+                 message = message + " 0x"
+                 message = message + "{:02x}".format(buffer[x+6]).upper()
+         else:
+             message = message + " REMOTE REQUEST FRAME"
      print(message)
     
       
@@ -315,6 +461,8 @@ ser = serial.Serial(
       #rtscts = 0,
       )
 
+
+readInfo()
 
 if (setSpeed(speed) == False):
     logging.error("This speed {} is not supported.".format(speed))
@@ -383,6 +531,7 @@ while True:
         sendData = setMsg(frameId, frameRequest, frameType, frameLength, frameData)
         sendMsg(sendData)
         logging.info("Transmit={}".format(sendData))
+        printInfo("Transmit=", sendData)
         udp.request = False
 
     if ser.in_waiting > 0:
@@ -398,7 +547,8 @@ while True:
 
         buffer = parse.parseData(b)
         if (len(buffer) > 0):
-            logging.info("Receive={}".format(buffer))
+            #logging.info("Receive={}".format(buffer))
+            printInfo("Receive=", buffer)
             printData(buffer)
 
 
