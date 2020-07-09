@@ -53,8 +53,23 @@ c=0x55
 ** Inquiry BAUDRATE
 [AA AA D0 FE FF 01 00 00 00 00 00 00 00 00 00 FF 01 01 CE 55 55]
 
-
-
+** Inquiry MASK
+[AA AA E0 FE FF 01 00 00 00 80 00 00 00 00 08 FF 01 00 66 55 55]
+[AA AA E1 FE FF 01 00 00 00 C0 00 00 00 00 08 FF 01 00 A7 55 55]
+[AA AA E2 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 60 55 55]
+[AA AA E3 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 61 55 55]
+[AA AA E4 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 62 55 55]
+[AA AA E5 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 63 55 55]
+[AA AA E6 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 64 55 55]
+[AA AA E7 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 65 55 55]
+[AA AA E8 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 66 55 55]
+[AA AA E9 FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 67 55 55]
+[AA AA EA FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 68 55 55]
+[AA AA EB FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 69 55 55]
+[AA AA EC FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 6A 55 55]
+[AA AA ED FE FF 01 FF FF FF 5F FF FF FF 1F 08 FF 01 00 6B 55 55]
+[AA AA EE FE FF 01 00 00 00 00 01 00 00 00 08 FF 01 00 F5 55 55]
+[AA AA EF FE FF 01 FF FF FF FF FF FF FF FF 08 FF 01 00 ED 55 55]
 
 * Set Speed(1,000,000bps)
 c=0xAA
@@ -233,7 +248,7 @@ c=0x55
 [00] 0xAA : Start Mark[1]
 [01] 0xAA : Start mark[2]
 ---- Start of CRC Calculate ----
-[02] 0x0n : Mask Number(0-15)
+[02] 0xEn : Mask Number(0-15)
 [03] 0x00
 [04] 0x00
 [05] 0x00
@@ -245,10 +260,10 @@ c=0x55
 [11] 0x0F : Mask & 0xFF00 >> 8
 [12] 0x00 : Mask & 0xFF0000 >> 16
 [13] 0x00 : Mask & 0xFF000000 >> 24
-[14] 0x08 : Frame Data Length
-[15] 0x00 : Unkown
-[16] 0x01 : Frame type (0:Standard/1:Extended)
-[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[14] 0x08 : Frame Data jLength
+[15] 0xFF : Must be 0FF
+[16] 0x01 : Must be Extended Frame
+[17] 0x00 : Must be 0(0:Set/1:Read)
 ---- End of CRC Calculate ----
 [18] 0xA2 : CRC(8 bits)
 [19] 0x55 : End Mark[0]
@@ -273,9 +288,9 @@ c=0x55
 [12] 0x34 : Mask & 0xFF0000 >> 16
 [13] 0x12 : Mask & 0xFF000000 >> 24 + Extende(0x40)
 [14] 0x08 : Frame Data Length
-[15] 0x00 : Unkown
-[16] 0x01 : Frame type (0:Standard/1:Extended)
-[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[15] 0xFF : Must be 0FF
+[16] 0x01 : Must be Extended Frame
+[17] 0x00 : Must be 0(0:Set/1:Read)
 ---- End of CRC Calculate ----
 [18] 0xA2 : CRC(8 bits)
 [19] 0x55 : End Mark[0]
