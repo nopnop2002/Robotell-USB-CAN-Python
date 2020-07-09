@@ -12,7 +12,7 @@ Inquire using the following CAN-ID.
 
 c=0xAA
 c=0xAA
-c=0xD0 : Inquire-ID & 0xff
+c=0xD0 : Inquire-ID & 0xFF
 c=0xFE : Inquire-ID & 0xFF00 >> 8
 c=0xFF : Inquire-ID & 0xFF0000 >> 16
 c=0x01 : Inquire-ID & 0xFF000000 >> 24
@@ -25,27 +25,30 @@ c=0x00 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
-c=0xFF : 
+c=0xFF : Must be 0xFF
 c=0x01 : Must be 0x01
 c=0x00 : Request Type(0:Set/1:Inquiry)
 c=0x66 : CRC
 c=0x55
 c=0x55
 
-** VERSION
-[AA AA E0 FF FF 01 01 00 00 00 C5 24 00 08 08 FF 01 00 D9 55 55]
+** Inquiry VERSION
+[AA AA E0 FF FF 01 00 00 00 00 00 00 00 00 00 FF 01 00 DF 55 55]
 
-** CPU_INFO1
-[AA AA F1 FF FF 01 11 30 17 67 00 00 00 00 08 FF 01 00 B7 55 55]
+** Inquiry CPU_INFO0
+[AA AA F0 FF FF 01 00 00 00 00 00 00 00 00 00 FF 01 00 EF 55 55]
 
-** ABOM
-[AA AA B0 FE FF 01 00 00 00 00 C5 24 00 08 08 FF 01 00 A7 55 55]
+** Inquiry CPU_INFO1
+[AA AA F1 FF FF 01 00 00 00 00 00 00 00 00 00 FF 01 00 F0 55 55]
 
-** ART
-[AA AA A0 FE FF 01 00 00 00 00 C5 24 00 08 08 FF 01 00 97 55 55]
+** Inquiry ABOM
+[AA AA B0 FE FF 01 00 00 00 00 00 00 00 00 00 FF 01 00 AE 55 55]
 
-** BAUDRATE
-[AA AA D0 FE FF 01 20 A1 07 00 01 02 00 00 04 FF 01 01 9E 55 55]
+** Inquiry ART
+[AA AA A0 FE FF 01 00 00 00 00 00 00 00 00 00 FF 01 00 97 55 55]
+
+** Inquiry BAUDRATE
+[AA AA D0 FE FF 01 00 00 00 00 00 00 00 00 00 FF 01 01 CE 55 55]
 
 
 
@@ -69,7 +72,7 @@ c=0x04 : Frame Data Length
 c=0xFF
 c=0x01 : Frame Type(1:Extended)
 c=0x00 : Request Type(0:Set/1:Read)
-c=0x66
+c=0x66 : CRC
 c=0x55
 c=0x55
 
@@ -93,7 +96,7 @@ c=0x04 : Frame Data Length
 c=0xFF : System Frame
 c=0x01 : Extended Frame
 c=0x00 : Request Type(0:Set/1:Read)
-c=0x16
+c=0x16 : CRC
 c=0x55
 c=0x55
 
@@ -115,7 +118,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00  --> 0:Set/1:Return
+c=0x00
 c=0x9D
 c=0x55
 c=0x55
