@@ -1,25 +1,72 @@
 USB CAN Adapter Receive Format
 
+* Read MCU Information
+#define CAN_BAUDRATE_ID 	0x01fffed0
+#define CAN_CPU_INFO0_ID	0x01fffff0
+#define CAN_CPU_INFO1_ID	(CAN_CPU_INFO0_ID + 1)
+#define CAN_VERSION_ID		0x01ffffe0
+#define CAN_ABOM_ID				0x01fffeb0
+#define CAN_ART_ID				0x01fffea0
+
+c=0xAA
+c=0xAA
+c=0xD0 : ID[3]
+c=0xFE : ID[2]
+c=0xFF : ID[1]
+c=0x01 : ID[0]
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0xFF
+c=0x01 : Must be 0x01
+c=0x00 : Request Type(0:Set/1:Read)
+c=0x66 : CRC
+c=0x55
+c=0x55
+
+** VERSION
+[AA AA E0 FF FF 01 01 00 00 00 C5 24 00 08 08 FF 01 00 D9 55 55]
+
+** CPU_INFO1
+[AA AA F1 FF FF 01 11 30 17 67 00 00 00 00 08 FF 01 00 B7 55 55]
+
+** ABOM
+[AA AA B0 FE FF 01 00 00 00 00 C5 24 00 08 08 FF 01 00 A7 55 55]
+
+** ART
+[AA AA A0 FE FF 01 00 00 00 00 C5 24 00 08 08 FF 01 00 97 55 55]
+
+** BAUDRATE
+[AA AA D0 FE FF 01 20 A1 07 00 01 02 00 00 04 FF 01 01 9E 55 55]
+
+
+
 
 * Set Speed(1,000,000bps)
 c=0xAA
 c=0xAA
-c=0xD0
-c=0xFE
+c=0xD0 : CAN_BAUDRATE_ID
+c=0xFE : CAN_BAUDRATE_ID
+c=0xFF : CAN_BAUDRATE_ID
+c=0x01 : CAN_BAUDRATE_ID
+c=0x40 : Speed
+c=0x42 : Speed
+c=0x0F : Speed
+c=0x00 : Speed(0x000f4240=1,000,000)
+c=0x01 : Not use
+c=0x02 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x04 : Frame Data Length
 c=0xFF
-c=0x01
-c=0x40
-c=0x42
-c=0x0F
-c=0x00
-c=0x01
-c=0x02
-c=0x00
-c=0x00
-c=0x04
-c=0xFF
-c=0x01
-c=0x00
+c=0x01 : Frame Type(1:Extended)
+c=0x00 : Request Type(0:Set/1:Read)
 c=0x66
 c=0x55
 c=0x55
@@ -28,22 +75,22 @@ c=0x55
 * Set Speed(800,000bps)
 c=0xAA
 c=0xAA
-c=0xD0
-c=0xFE
+c=0xD0 : CAN_BAUDRATE_ID
+c=0xFE : CAN_BAUDRATE_ID
+c=0xFF : CAN_BAUDRATE_ID
+c=0x01 : CAN_BAUDRATE_ID
+c=0x00 : Speed
+c=0x35 : Speed
+c=0x0C : Speed
+c=0x00 : Speed(0x000c3500=800,000)
+c=0x01 : Not use
+c=0x02 : Not use
+c=0x00 : Not use
+c=0x00 : Not use
+c=0x04 : Frame Data Length
 c=0xFF
 c=0x01
-c=0x00
-c=0x35
-c=0x0C
-c=0x00
-c=0x01
-c=0x02
-c=0x00
-c=0x00
-c=0x04
-c=0xFF
-c=0x01
-c=0x00
+c=0x00 : Request Type(0:Set/1:Read)
 c=0x16
 c=0x55
 c=0x55
@@ -51,14 +98,14 @@ c=0x55
 * Set Speed(500,000bps)
 c=0xAA
 c=0xAA
-c=0xD0
-c=0xFE
-c=0xFF
-c=0x01
-c=0x20
-c=0xA1
-c=0x07
-c=0x00
+c=0xD0 : CAN_BAUDRATE_ID
+c=0xFE : CAN_BAUDRATE_ID
+c=0xFF : CAN_BAUDRATE_ID
+c=0x01 : CAN_BAUDRATE_ID
+c=0x20 : speed
+c=0xA1 : speed
+c=0x07 : speed
+c=0x00 : speed(0x0007a120=500,000)
 c=0x01
 c=0x02
 c=0x00
@@ -66,10 +113,13 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00
+c=0x00  --> 0:Set/1:Return
 c=0x9D
 c=0x55
 c=0x55
+
+* Return
+[AA AA D0 FE FF 01 20 A1 07 00 01 02 00 00 04 FF 01 01 9E 55 55 ]
 
 * Set Speed(400,000bps)
 c=0xAA
@@ -89,7 +139,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00
+c=0x00  --> 0:Set/1:Return
 c=0x75
 c=0x55
 c=0x55
@@ -113,7 +163,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00
+c=0x00  --> 0:Set/1:Return
 c=0x38
 c=0x55
 c=0x55
@@ -137,7 +187,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00
+c=0x00  --> 0:Set/1:Return
 c=0x06
 c=0x55
 c=0x55
@@ -146,10 +196,10 @@ c=0x55
 * Set Speed(100,000bps)
 c=0xAA
 c=0xAA
-c=0xD0
-c=0xFE
-c=0xFF
-c=0x01
+c=0xD0  --> CAN_BAUDRATE_ID
+c=0xFE  --> CAN_BAUDRATE_ID
+c=0xFF  --> CAN_BAUDRATE_ID
+c=0x01  --> CAN_BAUDRATE_ID
 c=0xA0
 c=0x86
 c=0x01
@@ -161,12 +211,12 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00
+c=0x00  --> 0:Set/1:Return
 c=0xFC
 c=0x55
 c=0x55
 
-* Send Data Frame
+* Serial Receive Frame
 [00] 0xAA : Start Mark[1]
 [01] 0xAA : Start mark[2]
 [02] 0x78 : Frame ID[3]
@@ -182,9 +232,9 @@ c=0x55
 [12] 0x00 : Frame Data[6]
 [13] 0x00 : Frame Data[70]
 [14] c=04 : Frame Data Length
-[15] c=00 : Unkown
-[16] 0x01 : Frame type (0:Standard/1:Extended)
-[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[15] c=00 : Frame Type(00:Can Frame/FF:System Frame)
+[16] 0x01 : CAN Frame Type (0:Standard/1:Extended)
+[17] 0x01 : CAN Request Type (0:Data frame/1:Remote frame)
 [18] 0x3F : CRC
 [19] 0x55 :
 [20] 0x55 :
