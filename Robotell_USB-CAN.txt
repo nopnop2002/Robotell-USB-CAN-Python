@@ -25,7 +25,7 @@ c=0x00 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
-c=0xFF
+c=0xFF : 
 c=0x01 : Must be 0x01
 c=0x00 : Request Type(0:Set/1:Inquiry)
 c=0x66 : CRC
@@ -90,8 +90,8 @@ c=0x02 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x04 : Frame Data Length
-c=0xFF
-c=0x01
+c=0xFF : System Frame
+c=0x01 : Extended Frame
 c=0x00 : Request Type(0:Set/1:Read)
 c=0x16
 c=0x55
@@ -130,10 +130,10 @@ c=0xD0
 c=0xFE
 c=0xFF
 c=0x01
-c=0x80
-c=0x1A
-c=0x06
-c=0x00
+c=0x80 : speed
+c=0x1A : speed
+c=0x06 : speed
+c=0x00 : speed(0x00061A80=400,000)
 c=0x01
 c=0x02
 c=0x00
@@ -141,7 +141,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00  --> 0:Set/1:Return
+c=0x00
 c=0x75
 c=0x55
 c=0x55
@@ -154,10 +154,10 @@ c=0xD0
 c=0xFE
 c=0xFF
 c=0x01
-c=0x90
-c=0xD0
-c=0x03
-c=0x00
+c=0x90 : speed
+c=0xD0 : speed
+c=0x03 : speed
+c=0x00 : speed(0x0003D090=250,000)
 c=0x01
 c=0x02
 c=0x00
@@ -165,7 +165,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00  --> 0:Set/1:Return
+c=0x00
 c=0x38
 c=0x55
 c=0x55
@@ -178,10 +178,10 @@ c=0xD0
 c=0xFE
 c=0xFF
 c=0x01
-c=0x48
-c=0xE8
-c=0x01
-c=0x00
+c=0x48 : speed
+c=0xE8 : speed
+c=0x01 : speed
+c=0x00 : speed(0x0001E848=125,000)
 c=0x01
 c=0x02
 c=0x00
@@ -189,7 +189,7 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00  --> 0:Set/1:Return
+c=0x00
 c=0x06
 c=0x55
 c=0x55
@@ -198,14 +198,14 @@ c=0x55
 * Set Speed(100,000bps)
 c=0xAA
 c=0xAA
-c=0xD0  --> CAN_BAUDRATE_ID
-c=0xFE  --> CAN_BAUDRATE_ID
-c=0xFF  --> CAN_BAUDRATE_ID
-c=0x01  --> CAN_BAUDRATE_ID
-c=0xA0
-c=0x86
+c=0xD0
+c=0xFE
+c=0xFF
 c=0x01
-c=0x00
+c=0xA0 : speed
+c=0x86 : speed
+c=0x01 : speed
+c=0x00 : speed(0x000186A0=100,000)
 c=0x01
 c=0x02
 c=0x00
@@ -213,10 +213,19 @@ c=0x00
 c=0x04
 c=0xFF
 c=0x01
-c=0x00  --> 0:Set/1:Return
+c=0x00
 c=0xFC
 c=0x55
 c=0x55
+
+
+
+
+
+
+
+
+
 
 * Serial Receive Frame
 [00] 0xAA : Start Mark[1]
@@ -234,18 +243,15 @@ c=0x55
 [12] 0x00 : Frame Data[6]
 [13] 0x00 : Frame Data[70]
 [14] c=04 : Frame Data Length
-[15] c=00 : Frame Type(00:Can Frame/FF:System Frame)
+[15] c=00 : Frame Type(00:Can Frame/FF:System Frame like BAUDRATE set)
 [16] 0x01 : CAN Frame Type (0:Standard/1:Extended)
 [17] 0x01 : CAN Request Type (0:Data frame/1:Remote frame)
 [18] 0x3F : CRC
 [19] 0x55 :
 [20] 0x55 :
-[21] 0xF0 :
 
 
-USB CAN Adapter Transmit Format
-
-* Receive Frame
+* Receive Frame example
 AA AA 0F 00 00 10 10 11 12 13 14 15 00 00 06 00 01 00 95 55 55
 
 AA AA 00 01 00 00 10 11 12 13 14 15 00 00 06 00 00 00 76 55 55
@@ -342,7 +348,7 @@ FrameCtrl is not included in crc calculation.
 [04] 0x00 : Frame ID[1]
 [05] 0x10 : Frame ID[0]
 [06] 0xA5 : FrameCtrl   ---> Inserted (not included in crc calculation)
-[07] 0x55 : Frame Data[0]
+[07] 0x55 : Frame Data[0]  ---> Ctrl Code
 [08] 0x11 : Frame Data[1]
 [09] 0x12 : Frame Data[2]
 [10] 0x13 : Frame Data[3]
@@ -383,7 +389,7 @@ FrameCtrl is not included in crc calculation.
 [17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
 ---- End of CRC Calculate ----
 [18] 0xA5 : FrameCtrl  ---> Inserted
-[19] 0xA5 : CRC(8 bits)
+[19] 0xA5 : CRC(8 bits)  ---> Ctrl Code
 [20] 0x55 : End Mark[0]
 [21] 0x55 : End mark[1]
 
