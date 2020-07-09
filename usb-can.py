@@ -41,11 +41,16 @@ class ServerThread(threading.Thread):
     def run(self):
         while True:
             try:
-                packet, self.addr = self.udpServSock.recvfrom(self.BUFSIZE) # Receive Data
+                #packet, self.addr = self.udpServSock.recvfrom(self.BUFSIZE) # Receive Data
+                packet, addr = self.udpServSock.recvfrom(self.BUFSIZE) # Receive Data
+                logging.debug("addr={}".format(addr))
                 logging.debug("recvfrom packet={}".format(packet))
                 self.packet = packet.decode()                
                 json_dict = json.loads(self.packet) # If parsing fails, go to exception
                 logging.debug("json_dict={}".format(json_dict))
+                self.addr = addr[0]
+                self.port = addr[1]
+                logging.debug("self.addr={} self.port={}".format(self.addr, self.port))
                 self.id = json_dict["id"]
                 self.type = json_dict["type"]
                 logging.debug("self.id={} self.type={}".format(self.id, self.type))
@@ -71,7 +76,7 @@ class ParseClass(object):
         self.status = 0
 
     def parseData(self, ch):
-        #print("ch={:02x} {} status={} len={}".format(ch, ch, self.status, len(self.buffer)))
+        logging.debug("ch=0x{:02x} {} status={} len={}".format(ch, ch, self.status, len(self.buffer)))
         if (self.status == 0):
             #print("self.status == 0")
             if (ch == 0xAA):
@@ -97,7 +102,7 @@ class ParseClass(object):
             #print("self.status == 2")
             #print("self.buffer={}".format(self.buffer))
             if (len(self.buffer) == 18):
-                if (ch == 0xA5):
+                if (ch == 0xA5): # FrameCtrl,Next character is true CRC.
                     self.status = 3
                 else:
                     self.crc = self.crc & 0xff
@@ -109,7 +114,7 @@ class ParseClass(object):
                         self.status = 8
                         self.buffer.append(ch)
             else:
-                if (ch == 0xA5):
+                if (ch == 0xA5): # FrameCtrl,Skip this character
                     self.status = 4
                 else:
                     self.crc = self.crc + ch
@@ -300,6 +305,16 @@ def readInfo():
      #print("data4[18]={:2x}".format(data4[18]))
      sendMsg(data4)
 
+def readMaskSetting():
+     data = [0xAA, 0xAA, 0xE0, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+
+     for x in range(16):
+         print("x={}".format(x))
+         data[2] = 0xE0 + x
+         data[18]=sum(data[2:18]) & 0xFF
+         #print("data4[18]={:2x}".format(data4[18]))
+         sendMsg(data)
+
 def setSpeed(speed):
      logging.info("speed={}".format(speed))
      speed1000 = [0xAA, 0xAA, 0xD0, 0xFE, 0xFF, 0x01, 0x40, 0x42, 0x0F, 0x00, 0x01, 0x02, 0x00, 0x00, 0x04, 0xFF, 0x01, 0x00, 0x66, 0x55, 0x55]
@@ -355,7 +370,7 @@ def printData(buffer):
      logging.debug("buffer={}".format(buffer))
      if (buffer[15] == 0xFF):
          systemId = (buffer[5] << 24) + (buffer[4] << 16) + (buffer[3] << 8) + buffer[2]
-         logging.debug("systemId={:x}".format(systemId))
+         logging.info("systemId={:x}".format(systemId))
          if (systemId == 0x01ffffe0):
              message = "VERSION  ID: 0x"
          if (systemId == 0x01fffff0):
@@ -368,6 +383,9 @@ def printData(buffer):
              message = "ART      ID: 0x"
          if (systemId == 0x01fffed0):
              message = "BAUDRATE ID: 0x"
+         if ((systemId & 0x01fffff0) == 0x01fffee0):
+             index = systemId & 0xf
+             message = "MASK {:02d}  ID: 0x".format(index)
          message = message + "{:02x}".format(buffer[5]).upper()
          message = message + "{:02x}".format(buffer[4]).upper()
          message = message + "{:02x}".format(buffer[3]).upper()
@@ -464,6 +482,8 @@ ser = serial.Serial(
 
 readInfo()
 
+readMaskSetting()
+
 if (setSpeed(speed) == False):
     logging.error("This speed {} is not supported.".format(speed))
     sys.exit()
@@ -543,7 +563,7 @@ while True:
         #print( a[0] )
         b = a[0]
         #print(type(b))
-        logging.debug("b={:02x}".format(b))
+        #logging.debug("b={:02x}".format(b))
 
         buffer = parse.parseData(b)
         if (len(buffer) > 0):
