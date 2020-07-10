@@ -48,7 +48,8 @@ optional arguments:
 - log   
   Log level.   
   Default is WARNING.   
-#
+
+# Information of the USB-CAN Adapter   
 These displays are internal information of the USB-CAN Adapter, not CAN FRAME.   
 
 - BAUDRATE is the current speed.   
