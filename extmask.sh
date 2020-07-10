@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# index
+#   index of filter(0-15)
+# id
+#   filter id
+# mask
+#   filter mask
+# type
+#   std : for Standard frame
+#   ext : for Extended frame
+# status
+#   Enable  : Enable filter
+#   disable : Disable filter
+
 # Enable 0x00000103 and 0x00000106
 json=$(cat << EOS
 {
