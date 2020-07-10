@@ -1,3 +1,52 @@
+Flash Memory MAP
+
+--- CAN_ADDR_START ---
+[0] = 0xaaaaaaaa
+--- CAN_ADDR_BAUD ---
+[1] = 500,000 // Baudrate
+--- CAN_ADDR_FILTER 0 ---
+[2] = 0x01 : CAN_FILTER_EN | CAN_FORMAT_STD
+[3] = 0 : Id
+[4] = 0 : Mask
+--- CAN_ADDR_FILTER 1 ---
+[5] = 0x03 : CAN_FILTER_EN | CAN_FORMAT_EXT
+[6] = 0 : Id
+[7] = 0 : Mask
+--- CAN_ADDR_FILTER 2 ---
+[8] = 0x02 : CAN_FILTER_DIS | CAN_FORMAT_EXT
+[9] = 0x1FFFFFFF
+[10] = 0x1FFFFFFF
+--- CAN_ADDR_FILTER 3 ---
+[11]-[13] = Same as Mask2
+--- CAN_ADDR_FILTER 4 ---
+[14]-[16] = Same as Mask2
+--- CAN_ADDR_FILTER 5 ---
+[17]-[19] = Same as Mask2
+--- CAN_ADDR_FILTER 6 ---
+[20]-[22] = Same as Mask2
+--- CAN_ADDR_FILTER 7 ---
+[23]-[25] = Same as Mask2
+--- CAN_ADDR_FILTER 8 ---
+[26]-[28] = Same as Mask2
+--- CAN_ADDR_FILTER 9 ---
+[29]-[31] = Same as Mask2
+--- CAN_ADDR_FILTER 10 ---
+[32]-[34] = Same as Mask2
+--- CAN_ADDR_FILTER 11 ---
+[35]-[37] = Same as Mask2
+--- CAN_ADDR_FILTER 12 ---
+[38]-[40] = Same as Mask2
+--- CAN_ADDR_FILTER 13 ---
+[41]-[43] = Same as Mask2
+--- CAN_ADDR_ABOM ---
+[44] = False
+--- CAN_ADDR_ART ---
+[45] = False
+--- CAN_ADDR_VER ---
+[46] = 1
+
+
+
 USB CAN Adapter Receive Format
 
 * Inquiry about MCU side information
