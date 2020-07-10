@@ -57,7 +57,7 @@ These displays are internal information of the USB-CAN Adapter, not CAN FRAME.
 
 - VERSION is firmware version.   
 
-- FILTERxx is the current receive filter information.   
+- FILTERxx is the current receive filter setting.   
  The initial value enables reception of all CAN FRAMEs.   
 
 ```
