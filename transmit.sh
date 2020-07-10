@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# send Standard data frame
+
 json=$(cat << EOS
 {
   "request": "Transmit",
@@ -12,6 +14,8 @@ EOS
 
 echo "$json"
 echo "$json"  | socat - udp-datagram:255.255.255.255:8200,broadcast
+
+# send Extended data frame
 
 json=$(cat << EOS
 {
@@ -26,6 +30,8 @@ EOS
 echo "$json"
 echo "$json"  | socat - udp-datagram:255.255.255.255:8200,broadcast
 
+# send Standard remote frame
+
 json=$(cat << EOS
 {
   "request": "Transmit",
@@ -37,6 +43,8 @@ EOS
 
 echo "$json"
 echo "$json"  | socat - udp-datagram:255.255.255.255:8200,broadcast
+
+# send Extended remote frame
 
 json=$(cat << EOS
 {
