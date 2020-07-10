@@ -36,7 +36,7 @@ class ServerThread(threading.Thread):
         # bind
         self.udpServSock = socket(AF_INET, SOCK_DGRAM)
         self.udpServSock.bind(self.ADDR)      
-        self.request = False
+        self.interrupt = False
 
     def run(self):
         while True:
@@ -48,22 +48,32 @@ class ServerThread(threading.Thread):
                 self.packet = packet.decode()                
                 json_dict = json.loads(self.packet) # If parsing fails, go to exception
                 logging.debug("json_dict={}".format(json_dict))
-                self.addr = addr[0]
-                self.port = addr[1]
-                logging.debug("self.addr={} self.port={}".format(self.addr, self.port))
-                self.id = json_dict["id"]
-                self.type = json_dict["type"]
-                logging.debug("self.id={} self.type={}".format(self.id, self.type))
-                if (self.type == "stdData"):
-                    self.data = json_dict["data"]
-                    logging.debug("self.data={} len={}".format(self.data, len(self.data)))
-                    self.request = True
-                if (self.type == "extData"):
-                    self.data = json_dict["data"]
-                    logging.debug("self.data={} len={}".format(self.data, len(self.data)))
-                    self.request = True
-                if (self.type == "stdRemote"): self.request = True
-                if (self.type == "extRemote"): self.request = True
+                self.addrFrom = addr[0]
+                self.portFrom = addr[1]
+                logging.debug("self.addrFrom={} self.portFrom={}".format(self.addrFrom, self.portFrom))
+                self.request = json_dict["request"].lower()
+                if (self.request == "transmit"):
+                    self.id = json_dict["id"]
+                    self.type = json_dict["type"].lower()
+                    logging.debug("self.request={} self.id={} self.type={}".format(self.request, self.id, self.type))
+                    if (self.type == "stddata"):
+                        self.data = json_dict["data"]
+                        logging.debug("self.data={} len={}".format(self.data, len(self.data)), self.type)
+                        self.interrupt = True
+                    if (self.type == "extdata"):
+                        self.data = json_dict["data"]
+                        logging.debug("self.data={} len={}".format(self.data, len(self.data)))
+                        self.interrupt = True
+                    if (self.type == "stdremote"): self.interrupt = True
+                    if (self.type == "extremote"): self.interrupt = True
+                if (self.request == "filter"):
+                    self.index = json_dict["index"]
+                    self.id = json_dict["id"]
+                    self.mask = json_dict["mask"]
+                    self.type = json_dict["type"]
+                    self.status = json_dict["status"]
+                    logging.info("request={} index={} id={} mask={} type={} status{}".format(self.request, self.index, self.id, self.mask, self.type, self.status))
+                    self.interrupt = True
             except:
                 logging.error("json parse fail {}".format(self.packet))
                 pass
@@ -168,7 +178,7 @@ class ParseClass(object):
             return []
            
 # This is old version
-def _setMsg(id, rtr, ext, len, buf):
+def _setTransmitMsg(id, rtr, ext, len, buf):
     sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
     idStr = "{:08x}".format(id)
     logging.debug("idStr={}".format(idStr))
@@ -205,8 +215,114 @@ def insertCtrl(buffer, ch):
         result.append(USART_FRAMECTRL)
     return result
        
+def setFilterMsg(filterIndex, filterId, filterMask, frameType, filterStatus):
+    #sendData = [0xAA, 0xAA, 0xEx, 0xFE, 0xFF, 0x01, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
+    #print("sendData={}".format(sendData))
 
-def setMsg(id, rtr, ext, len, buf):
+    if (filterIndex > 15):
+        logging.waring("filterIndex {} is too large.".format(filterIndex))
+        return []
+
+    if (frameType.lower() != "std" and frameType.lower() != "ext"):
+        logging.waring("frameType {} is invalid.".format(frameType))
+        return []
+
+    if (filterStatus.lower() != "enable" and filterStatus.lower() != "disable"):
+        logging.waring("filterStatus {} is invalid.".format(filterStatus))
+        return []
+
+    sendData = [0xAA, 0xAA]
+    id = 0xE0 + filterIndex
+    sendData.append(id)
+    crc = id
+    id = 0xFE
+    crc = crc + id
+    sendData.append(id)
+    id = 0xFF
+    crc = crc + id
+    sendData.append(id)
+    id = 0x01
+    crc = crc + id
+    sendData.append(id)
+
+    idStr = "{:08x}".format(filterId)
+    if (frameType.lower() == "std"):
+        id = int(idStr[6:8],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[4:6],16) & 0x7
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        sendData.append(0)
+        id = 0 # Disable
+        if (filterStatus.lower() == "enable"): id = 0x80 # Enable
+        sendData.append(id)
+        crc = crc + id
+        logging.debug("id={:02x}{:02x}".format(sendData[2], sendData[3]))
+    else:
+        id = int(idStr[6:8],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[4:6],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[2:4],16)
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        id = int(idStr[0:2],16) & 0x1F
+        if (filterStatus.lower() == "enable"): id = 0x80 # Enable
+        sendData = insertCtrl(sendData, id)
+        sendData.append(id)
+        crc = crc + id
+        logging.debug("id={:02x}{:02x}".format(sendData[2], sendData[3]))
+
+    filterMaskStr = "{:08x}".format(filterMask)
+    mask = int(filterMaskStr[6:8],16)
+    sendData = insertCtrl(sendData, mask)
+    sendData.append(mask)
+    crc = crc + mask
+    mask = int(filterMaskStr[4:6],16)
+    sendData = insertCtrl(sendData, mask)
+    sendData.append(mask)
+    crc = crc + mask
+    mask = int(filterMaskStr[2:4],16)
+    sendData = insertCtrl(sendData, mask)
+    sendData.append(mask)
+    crc = crc + mask
+    mask = int(filterMaskStr[0:2],16) & 0x1F
+    if (frameType.lower() == "ext"):
+        mask = mask + 0x40 # Extended
+    sendData = insertCtrl(sendData, mask)
+    sendData.append(mask)
+    crc = crc + mask
+
+    len = 8
+    sendData.append(len) # Frame Data Length
+    crc = crc + len
+    req = 0xFF
+    sendData.append(req)
+    crc = crc + req
+    ext = 1
+    sendData.append(ext) # Standard/Extended frame
+    crc = crc + ext
+    rtr = 0 # Set
+    sendData.append(rtr) # Set/Read
+    crc = crc + rtr
+    crc = crc & 0xff
+    logging.debug("crc={:2x}".format(crc))
+    sendData = insertCtrl(sendData, crc)
+    sendData.append(crc)
+    sendData.append(0x55)
+    sendData.append(0x55)
+    logging.debug("sendData={}".format(sendData))
+    return sendData
+
+def setTransmitMsg(id, rtr, ext, len, buf):
     #sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
     #print("sendData={}".format(sendData))
 
@@ -258,7 +374,7 @@ def setMsg(id, rtr, ext, len, buf):
     crc = crc + ext
     sendData.append(rtr) # Data/Request frame
     crc = crc + rtr
-    crc = crc &0xff
+    crc = crc & 0xff
     logging.debug("crc={:2x}".format(crc))
     sendData = insertCtrl(sendData, crc)
     sendData.append(crc)
@@ -278,42 +394,35 @@ def sendMsg( buf ):
             ser.write(a)
       ser.flush()
          
-def readInfo():
-     data0 = [0xAA, 0xAA, 0xE0, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
-     data1 = [0xAA, 0xAA, 0xF0, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
-     data2 = [0xAA, 0xAA, 0xF1, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
-     data3 = [0xAA, 0xAA, 0xB0, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
-     data4 = [0xAA, 0xAA, 0xA0, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+def initId():
+    data = [0xAA, 0xAA, 0xFF, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x08, 0xFF, 0x01, 0x00, 0x66, 0x55, 0x55]
 
-     data0[18]=sum(data0[2:18]) & 0xFF
-     #print("data0[18]={:02x}".format(data0[18]))
-     sendMsg(data0)
+    data[18]=sum(data[2:18]) & 0xFF
+    #print("data[18]={:02x}".format(data[18]))
+    sendMsg(data)
 
-     data1[18]=sum(data1[2:18]) & 0xFF
-     #print("data1[18]={:2x}".format(data1[18]))
-     sendMsg(data1)
 
-     data2[18]=sum(data2[2:18]) & 0xFF
-     #print("data2[18]={:2x}".format(data2[18]))
-     sendMsg(data2)
+def readInfo(id):
+    data = [0xAA, 0xAA, 0xE0, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
+    idStr = "{:08x}".format(id)
+    #print("idStr={}".format(idStr))
+    data[2] = int(idStr[6:8],16)
+    data[3] = int(idStr[4:6],16)
+    data[4] = int(idStr[2:4],16)
+    data[5] = int(idStr[0:2],16)
+    data[18]=sum(data[2:18]) & 0xFF
+    #print("data={:02x}{:02x}{:02x}{:02x}".format(data[2], data[3], data[4], data[5]))
+    sendMsg(data)
+     
 
-     data3[18]=sum(data3[2:18]) & 0xFF
-     #print("data3[18]={:2x}".format(data3[18]))
-     sendMsg(data3)
-
-     data4[18]=sum(data4[2:18]) & 0xFF
-     #print("data4[18]={:2x}".format(data4[18]))
-     sendMsg(data4)
-
-def readMaskSetting():
+def readFilter(index):
      data = [0xAA, 0xAA, 0xE0, 0xFE, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x01, 0x66, 0x55, 0x55]
 
-     for x in range(16):
-         #print("x={}".format(x))
-         data[2] = 0xE0 + x
-         data[18]=sum(data[2:18]) & 0xFF
-         #print("data4[18]={:2x}".format(data4[18]))
-         sendMsg(data)
+     #print("index={}".format(index))
+     data[2] = 0xE0 + index
+     data[18]=sum(data[2:18]) & 0xFF
+     #print("data4[18]={:2x}".format(data4[18]))
+     sendMsg(data)
 
 def setSpeed(speed):
      logging.info("speed={}".format(speed))
@@ -357,7 +466,7 @@ def setSpeed(speed):
          return False
 
     
-def printInfo(header, buffer):
+def loggingFrame(header, buffer):
      message = header
      message = message + "["
      for x in range(len(buffer)):
@@ -366,26 +475,31 @@ def printInfo(header, buffer):
      message = message + "]"
      logging.info(message)
 
-def printData(buffer):
+def printFrame(buffer):
      logging.debug("buffer={}".format(buffer))
+     if (buffer[16] == 0): # Standard frame
+         receiveId = (buffer[3] << 8) + buffer[2]
+     else: # Extended frame
+         receiveId = (buffer[5] << 24) + (buffer[4] << 16) + (buffer[3] << 8) + buffer[2]
+     logging.debug("receiveId=0x{:X}".format(receiveId))
      if (buffer[15] == 0xFF):
-         systemId = (buffer[5] << 24) + (buffer[4] << 16) + (buffer[3] << 8) + buffer[2]
-         logging.info("systemId={:x}".format(systemId))
-         if (systemId == 0x01ffffe0):
-             message = "VERSION  ID: 0x"
-         if (systemId == 0x01fffff0):
-             message = "CPUINFO0 ID: 0x"
-         if (systemId == 0x01fffff1):
-             message = "CPUINFO1 ID: 0x"
-         if (systemId == 0x01fffeb0):
-             message = "ABOM     ID: 0x"
-         if (systemId == 0x01fffea0):
-             message = "ART      ID: 0x"
-         if (systemId == 0x01fffed0):
+         if (receiveId == 0x01fffed0):
              message = "BAUDRATE ID: 0x"
-         if ((systemId & 0x01fffff0) == 0x01fffee0):
-             index = systemId & 0xf
-             message = "MASK {:02d}  ID: 0x".format(index)
+         elif (receiveId == 0x01fffff0):
+             message = "CPUINFO0 ID: 0x"
+         elif (receiveId == 0x01fffff1):
+             message = "CPUINFO1 ID: 0x"
+         elif (receiveId == 0x01ffffe0):
+             message = "VERSION  ID: 0x"
+         elif (receiveId == 0x01fffeff):
+             message = "INIT     ID: 0x"
+         elif (receiveId == 0x01fffeb0):
+             message = "ABOM     ID: 0x"
+         elif (receiveId == 0x01fffea0):
+             message = "ART      ID: 0x"
+         elif ((receiveId & 0x01fffff0) == 0x01fffee0):
+             index = receiveId & 0xf
+             message = "FILTER{:02d} ID: 0x".format(index)
          message = message + "{:02x}".format(buffer[5]).upper()
          message = message + "{:02x}".format(buffer[4]).upper()
          message = message + "{:02x}".format(buffer[3]).upper()
@@ -420,6 +534,7 @@ def printData(buffer):
          else:
              message = message + " REMOTE REQUEST FRAME"
      print(message)
+     return receiveId
     
       
 format="%(asctime)s [%(filename)s:%(lineno)d] %(levelname)-8s %(message)s"
@@ -455,6 +570,9 @@ else:
     print("logLevel set to {}".format(logging.WARNING))
     logging.basicConfig(level=logging.WARNING, format=format)
 
+if (speed != 1000000 and speed != 500000 and speed != 400000 and speed != 250000 and speed != 125000 and speed != 100000):
+    logging.error("This speed {} is not supported.".format(speed))
+    sys.exit()
 
 '''
 ser = serial.Serial(
@@ -480,15 +598,7 @@ ser = serial.Serial(
       )
 
 
-readInfo()
-
-readMaskSetting()
-
-if (setSpeed(speed) == False):
-    logging.error("This speed {} is not supported.".format(speed))
-    sys.exit()
-
-# Start Timer thread
+# Start Timer thread (Timer is not use)
 timer = TimerThread(ACTIVE=True, INTERVAL=5)
 timer.setDaemon(True)
 timer.start()
@@ -502,10 +612,44 @@ udp.start()
 
 buffer = []
 parse = ParseClass()
+receiveId = 0x01FFFFFF
 
 while True:
+    if (receiveId == 0x01FFFFFF):
+        initId()
+        receiveId = 0
+    elif (receiveId == 0x01FFFEFF):
+        setSpeed(speed)
+        receiveId = 0
+    elif (receiveId == 0x01FFFED0):
+        readInfo(0x01FFFFE0)
+        receiveId = 0
+    elif (receiveId == 0x01FFFFE0):
+        readInfo(0x01FFFFF0)
+        receiveId = 0
+    elif (receiveId == 0x01FFFFF0):
+        readInfo(0x01FFFFF1)
+        receiveId = 0
+    elif (receiveId == 0x01FFFFF1):
+        readInfo(0x01FFFEB0)
+        receiveId = 0
+    elif (receiveId == 0x01FFFEB0):
+        readInfo(0x01FFFEA0)
+        receiveId = 0
+    elif (receiveId == 0x01FFFEA0):
+        readFilter(0)
+        receiveId = 0
+    elif ((receiveId & 0x01FFFFF0) == 0x01FFFEE0):
+        index = receiveId & 0xf
+        #print("index={}".format(index))
+        if (index != 15):
+            readFilter(index+1)
+            receiveId = 0
+        else:
+            receiveId = 0xFFFFFFFF
+        
     if timer.timerFlag is True:
-        logging.debug("timeFlag")
+        #print("timeFlag")
         timer.timerFlag = False
         """
         sendData = [0xAA, 0xAA, 0x78, 0x56, 0x34, 0x12, 0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3F, 0x55, 0x55, 0xF0]
@@ -518,41 +662,57 @@ while True:
         frameType = 1
         frameLength = 4
         frameData = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88]
-        sendData = setMsg(frameId, frameRequest, frameType, frameLength, frameData)
+        sendData = setTransmitMsg(frameId, frameRequest, frameType, frameLength, frameData)
         sendMsg(sendData)
         """
 
-    if udp.request is True:
-        logging.debug("udp request")
-        logging.debug("id={} type={}".format(udp.id, udp.type))
-        frameId = int(udp.id, 16)
-        logging.debug("frameId={:x}".format(frameId))
-        if (udp.type == "stdData"):
-            frameRequest = 0
-            frameType = 0
-            frameLength = len(udp.data)
-        if (udp.type == "extData"):
-            frameRequest = 0
-            frameType = 1
-            frameLength = len(udp.data)
-        if (udp.type == "stdRemote"):
-            frameRequest = 1
-            frameType = 0
-            frameLength = 0
-        if (udp.type == "extRemote"):
-            frameRequest = 1
-            frameType = 1
-            frameLength = 0
-        frameData = []
-        for x in range(frameLength):
-            logging.debug("udp.data={}".format(udp.data[x]))
-            frameData.append(udp.data[x])
-        logging.debug("frameData={}".format(frameData))
-        sendData = setMsg(frameId, frameRequest, frameType, frameLength, frameData)
-        sendMsg(sendData)
-        logging.info("Transmit={}".format(sendData))
-        printInfo("Transmit=", sendData)
-        udp.request = False
+    if udp.interrupt is True:
+        logging.info("udp interrupt request={}".format(udp.request))
+        if (udp.request == "transmit"):
+            logging.debug("id={} type={}".format(udp.id, udp.type))
+            frameId = int(udp.id, 16)
+            logging.debug("frameId={:x}".format(frameId))
+            if (udp.type == "stddata"):
+                frameRequest = 0
+                frameType = 0
+                frameLength = len(udp.data)
+            if (udp.type == "extdata"):
+                frameRequest = 0
+                frameType = 1
+                frameLength = len(udp.data)
+            if (udp.type == "stdremote"):
+                frameRequest = 1
+                frameType = 0
+                frameLength = 0
+            if (udp.type == "extremote"):
+                frameRequest = 1
+                frameType = 1
+                frameLength = 0
+            frameData = []
+            for x in range(frameLength):
+                logging.debug("udp.data={}".format(udp.data[x]))
+                frameData.append(udp.data[x])
+            logging.debug("frameData={}".format(frameData))
+            sendData = setTransmitMsg(frameId, frameRequest, frameType, frameLength, frameData)
+            sendMsg(sendData)
+            logging.info("Transmit={}".format(sendData))
+            loggingFrame("Transmit=", sendData)
+            udp.interrupt = False
+
+        if (udp.request == "filter"):
+            logging.info("index={} id={} mask={} type={} status={}".format(udp.index, udp.id, udp.mask, udp.type, udp.status))
+            filterIndex = int(udp.index)
+            filterId = int(udp.id,16)
+            filterMask = int(udp.mask,16)
+            frameType = udp.type
+            filterStatus = udp.status
+            logging.debug("filterIndex={} filterId=0x{:x} filterMask=0x{:x} frameType={} filterStatus={}".format(filterIndex, filterId, filterMask, frameType, filterStatus))
+            sendData = setFilterMsg(filterIndex, filterId, filterMask, frameType, filterStatus)
+            if (len(sendData) > 0):
+                sendMsg(sendData)
+                logging.info("Mask={}".format(sendData))
+                loggingFrame("Mask=", sendData)
+            udp.interrupt = False
 
     if ser.in_waiting > 0:
         recv_data = ser.read(1)
@@ -568,7 +728,11 @@ while True:
         buffer = parse.parseData(b)
         if (len(buffer) > 0):
             #logging.info("Receive={}".format(buffer))
-            printInfo("Receive=", buffer)
-            printData(buffer)
+            loggingFrame("Receive=", buffer)
+            #print("receiveId={:x}".format(receiveId))
+            if (receiveId == 0xFFFFFFFF):
+                printFrame(buffer)
+            else:
+                receiveId = printFrame(buffer)
 
 
