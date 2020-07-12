@@ -160,8 +160,8 @@ c=0x02 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x04 : Frame Data Length
-c=0xFF : System Frame
-c=0x01 : Extended Frame
+c=0xFF : System Message(Must be 0xFF)
+c=0x01 : Must be Extended Frame
 c=0x00 : Request Type(0:Set/1:Read)
 c=0x16 : CRC
 c=0x55
@@ -310,7 +310,7 @@ c=0x55
 [12] 0x00 : (Mask >> 16) & 0xFF
 [13] 0x00 : (Mask >> 24) & 0xFF
 [14] 0x08 : Frame Data jLength
-[15] 0xFF : Must be 0FF
+[15] 0xFF : System Message(Must be 0xFF)
 [16] 0x01 : Must be Extended Frame
 [17] 0x00 : Must be 0(0:Set/1:Read)
 ---- End of CRC Calculate ----
@@ -337,7 +337,7 @@ c=0x55
 [12] 0x34 : (Mask >> 16) & 0xFF
 [13] 0x12 : (Mask >> 24) & 0xFF + Extende(0x40)
 [14] 0x08 : Frame Data Length
-[15] 0xFF : Must be 0FF
+[15] 0xFF : System Message(Must be 0xFF)
 [16] 0x01 : Must be Extended Frame
 [17] 0x00 : Must be 0(0:Set/1:Read)
 ---- End of CRC Calculate ----
@@ -363,7 +363,7 @@ c=0x55
 [12] 0x00 : Frame Data[6]
 [13] 0x00 : Frame Data[70]
 [14] c=04 : Frame Data Length
-[15] c=00 : Frame Type(00:Can Frame/FF:System Frame like BAUDRATE set)
+[15] c=00 : Message Type (00:Can Message/FF:System Message like BAUDRATE set)
 [16] 0x01 : CAN Frame Type (0:Standard/1:Extended)
 [17] 0x01 : CAN Request Type (0:Data frame/1:Remote frame)
 [18] 0x3F : CRC
@@ -417,9 +417,9 @@ Type = Extended Remote Frame
 [12] 0x16 : Frame Data[6]
 [13] 0x00 : Frame Data[7]
 [14] 0x00 : Frame Data Length
-[15] 0x00 : Unkown
-[16] 0x01 : Frame type (0:Standard/1:Extended)
-[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[15] 0x00 : Message Type (00:Can Message)
+[16] 0x01 : CAN Frame type (0:Standard/1:Extended)
+[17] 0x01 : CAN Request Type (0:Data frame/1:Remote request frame)
 ---- End of CRC Calculate ----
 [18] 0xA2 : CRC(8 bits)
 [19] 0x55 : End Mark[0]
@@ -453,9 +453,9 @@ FrameCtrl is not included in crc calculation.
 [14] 0x16 : Frame Data[6]
 [15] 0x00 : Frame Data[7]
 [16] 0x00 : Frame Data Length
-[17] 0x00 : Unkown
-[18] 0x01 : Frame type (0:Standard/1:Extended)
-[19] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[17] 0x00 : Message Type (00:Can Message)
+[18] 0x01 : CAN Frame type (0:Standard/1:Extended)
+[19] 0x01 : CAN Request Type (0:Data frame/1:Remote request frame)
 ---- End of CRC Calculate ----
 [20] 0xA2 : CRC(8 bits)
 [21] 0x55 : End Mark[0]
@@ -485,9 +485,9 @@ Type = Standard
 [12] 0x16 : Frame Data[6]
 [13] 0x00 : Frame Data[7]
 [14] 0x00 : Frame Data Length
-[15] 0x00 : Unkown
-[16] 0x01 : Frame type (0:Standard/1:Extended)
-[17] 0x01 : Request Type (0:Data frame/1:Remote request frame)
+[15] 0x00 : Message Type (00:Can Message)
+[16] 0x01 : CAN Frame type (0:Standard/1:Extended)
+[17] 0x01 : CAN Request Type (0:Data frame/1:Remote request frame)
 ---- End of CRC Calculate ----
 [18] 0xA5 : FrameCtrl    ---> Inserted
 [19] 0xA5 : CRC(8 bits)  ---> Real CRC
