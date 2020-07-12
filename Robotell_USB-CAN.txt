@@ -120,7 +120,7 @@ c=0x55
 [AA AA EE FE FF 01 00 00 00 00 01 00 00 00 08 FF 01 00 F5 55 55]
 [AA AA EF FE FF 01 FF FF FF FF FF FF FF FF 08 FF 01 00 ED 55 55]
 
-* Set Speed(1,000,000bps)
+* Set BAUDRATE(1,000,000bps)
 c=0xAA
 c=0xAA
 c=0xD0 : CAN_BAUDRATE_ID
@@ -136,15 +136,15 @@ c=0x02 : Not use
 c=0x00 : Not use
 c=0x00 : Not use
 c=0x04 : Frame Data Length
-c=0xFF
-c=0x01 : Frame Type(1:Extended)
+c=0xFF : System Message(Must be 0xFF)
+c=0x01 : Must be Extended Frame
 c=0x00 : Request Type(0:Set/1:Read)
 c=0x66 : CRC
 c=0x55
 c=0x55
 
 
-* Set Speed(800,000bps)
+* Set BAUDRATE(800,000bps)
 c=0xAA
 c=0xAA
 c=0xD0 : CAN_BAUDRATE_ID
@@ -167,13 +167,13 @@ c=0x16 : CRC
 c=0x55
 c=0x55
 
-* Set Speed(500,000bps)
+* Set BAUDRATE(500,000bps)
 c=0xAA
 c=0xAA
-c=0xD0 : CAN_BAUDRATE_ID
-c=0xFE : CAN_BAUDRATE_ID
-c=0xFF : CAN_BAUDRATE_ID
-c=0x01 : CAN_BAUDRATE_ID
+c=0xD0 :
+c=0xFE :
+c=0xFF :
+c=0x01 :
 c=0x20 : speed
 c=0xA1 : speed
 c=0x07 : speed
@@ -193,7 +193,7 @@ c=0x55
 * Return
 [AA AA D0 FE FF 01 20 A1 07 00 01 02 00 00 04 FF 01 01 9E 55 55 ]
 
-* Set Speed(400,000bps)
+* Set BAUDRATE(400,000bps)
 c=0xAA
 c=0xAA
 c=0xD0
@@ -217,7 +217,7 @@ c=0x55
 c=0x55
 
 
-* Set Speed(250,000bps)
+* Set BAUDRATE(250,000bps)
 c=0xAA
 c=0xAA
 c=0xD0
@@ -241,7 +241,7 @@ c=0x55
 c=0x55
 
 
-* Set Speed(125,000bps)
+* Set BAUDRATE(125,000bps)
 c=0xAA
 c=0xAA
 c=0xD0
@@ -265,7 +265,7 @@ c=0x55
 c=0x55
 
 
-* Set Speed(100,000bps)
+* Set BAUDRATE(100,000bps)
 c=0xAA
 c=0xAA
 c=0xD0
@@ -347,7 +347,7 @@ c=0x55
 
 
 
-* Serial Receive Format
+* CAN Frame Receive Format
 [00] 0xAA : Start Mark[1]
 [01] 0xAA : Start mark[2]
 [02] 0x78 : (Frame ID & 0xFF) >> 0
