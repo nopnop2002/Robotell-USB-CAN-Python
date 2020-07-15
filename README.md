@@ -9,7 +9,7 @@ I've bought a Robotell USB-CAN Adapter from AliExpress.
 The Windows application is published [here](https://www.amobbs.com/thread-4651667-1-1.html).   
 The link described as "ourdev_627692IXWNNX.rar" in the page is the Windows application.   
 
-So, I analyzed the communication message that flows through USB and created a new one in Python.
+So, I analyzed the communication message that flows through USB and created a new application with Python.
 
 # Software Requiment   
 - pyserial
