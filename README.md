@@ -32,7 +32,7 @@ optional arguments:
                         Set the logging level
 ```
 
-- pot   
+- port   
   Communication port.   
   Default is /dev/ttyUSB0.   
 
