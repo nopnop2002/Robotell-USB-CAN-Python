@@ -46,7 +46,7 @@ optional arguments:
   Supporting speed is 1M/800K/500K/400K/250K/125K/100K.   
 
 - udp   
-  UDP port number for receive   
+  UDP port number for receiving commands from the outside.   
   Default is 8200   
 
 - log   
