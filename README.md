@@ -133,5 +133,5 @@ $ ./extmask.sh
 
 # Trouble shooting
 Change the log level when the program starts.   
-You can see transmit data.   
+You can see receive & transmit packet.   
 ![USB-CAN -python-LogLevel](https://user-images.githubusercontent.com/6020549/86876808-74bed880-c120-11ea-85d1-6502682dbbdf.jpg)
