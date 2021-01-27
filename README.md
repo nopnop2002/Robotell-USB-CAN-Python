@@ -15,6 +15,8 @@ So, I analyzed the communication message that flows through USB and created a ne
 # Software Requiment   
 - pyserial
 
+- socat
+
 # How to use   
 ```
 $ git clone https://github.com/nopnop2002/Robotell-USB-CAN-Python
