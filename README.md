@@ -38,6 +38,7 @@ optional arguments:
 - port   
   Communication port.   
   Default is /dev/ttyUSB0.   
+  __Be sure to specify the correct port in Windows 10.__   
 
 - speed   
   CAN bit rate.   
