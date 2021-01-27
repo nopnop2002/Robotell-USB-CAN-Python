@@ -132,5 +132,6 @@ $ ./extmask.sh
 ![USBCAN-python-Windows](https://user-images.githubusercontent.com/6020549/86865771-9dd46e80-c10a-11ea-9a17-962add35e729.jpg)
 
 # Trouble shooting
-Start by changing the log level.   
+Change the log level when the program starts.   
+You can see transmit data.   
 ![USB-CAN -python-LogLevel](https://user-images.githubusercontent.com/6020549/86876808-74bed880-c120-11ea-85d1-6502682dbbdf.jpg)
