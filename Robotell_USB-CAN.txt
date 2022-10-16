@@ -462,11 +462,11 @@ FrameCtrl is not included in crc calculation.
 [22] 0x55 : End mark[1]
 
 Example
+       |---------------------------------------------------| Range of CRC
 [AA AA 02 01 00 00 A5 A5 A5 55 00 00 00 00 00 00 02 00 00 00 FF 55 55]
-ID = 0x0000102
-Data = A5 A5 A5 55 00 00 00 00 00 00
-Length = 02
-Type = Standard
+CRC = 0x02+0x01+0xA5+0x55+0x02 = 0xFF
+
+
 
 ** If CRC is 0xA5 / 0xAA / 0x55, insert FrameCtrl(0xA5)
 [00] 0xAA : Start Mark[1]
