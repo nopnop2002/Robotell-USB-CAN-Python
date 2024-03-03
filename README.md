@@ -17,7 +17,7 @@ So, I analyzed the communication message that flows through USB and created a ne
  $ python3 -m pip install pyserial   
 
 - socat   
- $ sudo apt-get install socat   
+ $ sudo apt install socat   
 
 # How to use   
 ```
