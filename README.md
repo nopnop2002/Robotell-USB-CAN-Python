@@ -13,9 +13,11 @@ But I can't understand Chinese.
 So, I analyzed the communication message that flows through USB and created a new application with Python.
 
 # Software Requiment   
-- pyserial
+- pyserial   
+ $ python3 -m pip install pyserial   
 
-- socat
+- socat   
+ $ sudo apt-get install socat   
 
 # How to use   
 ```
