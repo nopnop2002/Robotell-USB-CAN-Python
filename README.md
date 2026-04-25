@@ -142,7 +142,7 @@ $ ./extmask.sh
 ```
 
 # Running on Ubuntu 24.04.4
-<img width="659" height="630" alt="Image" src="https://github.com/user-attachments/assets/0651887d-e28c-4b9a-b5ba-b55a124ec3d5" />
+<img width="779" height="720" alt="Image" src="https://github.com/user-attachments/assets/e8957590-b638-48e1-a064-477f8360e12e" />
 
 # Running on Windows10
 ![USBCAN-python-Windows](https://user-images.githubusercontent.com/6020549/86865771-9dd46e80-c10a-11ea-9a17-962add35e729.jpg)
