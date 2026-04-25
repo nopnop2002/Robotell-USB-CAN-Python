@@ -118,7 +118,7 @@ $ ./transmit.sh
 ```
 
 # CAN receive filter settings(Standard Frame)
-This tool accepts filtering of standard frames via UDP broadcast.
+This tool accepts filtering of standard frames via UDP broadcast.   
 Open a new terminal and execute the following command:   
 ```
 $ chmod 777 stdmask.sh
@@ -130,7 +130,7 @@ $ ./stdmask.sh
 ```
 
 # CAN receive filter settings(Extended Frame)
-This tool accepts filtering of extended frames via UDP broadcast.
+This tool accepts filtering of extended frames via UDP broadcast.   
 Open a new terminal and execute the following command:   
 ```
 $ chmod 777 extmask.sh
