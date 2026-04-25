@@ -12,7 +12,7 @@ But I can't understand Chinese.
 
 So, I analyzed the communication message that flows through USB and created a new application with Python.
 
-# Software Requiment   
+# Software requirements
 - pyserial
 ```
 $ sudo apt install python3-pip python3-setuptools
@@ -25,10 +25,19 @@ $ sudo apt install socat
 ```
 
 # How to use   
+
+### Grant the logged-in user access to the USB port.
+```
+$ sudo usermod -a -G dialout logged-in-user-name
+$ sudo reboot
+```
+
+
+### Start script
 ```
 $ git clone https://github.com/nopnop2002/Robotell-USB-CAN-Python
 $ cd Robotell-USB-CAN-Python
-$ python ./usb-can.py --help
+$ python3 ./usb-can.py --help
 usage: usb-can.py [-h] [-p PORT] [-s SPEED] [-u UDP]
                   [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
 
@@ -132,8 +141,8 @@ Please change if necessary.
 $ ./extmask.sh
 ```
 
-# Running on Ubuntu 18.04.4
-![USBCAN-python-1](https://user-images.githubusercontent.com/6020549/86798048-55399880-c0ab-11ea-844d-5823554deff7.jpg)
+# Running on Ubuntu 24.04.4
+<img width="659" height="630" alt="Image" src="https://github.com/user-attachments/assets/0651887d-e28c-4b9a-b5ba-b55a124ec3d5" />
 
 # Running on Windows10
 ![USBCAN-python-Windows](https://user-images.githubusercontent.com/6020549/86865771-9dd46e80-c10a-11ea-9a17-962add35e729.jpg)

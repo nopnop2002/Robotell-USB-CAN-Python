@@ -600,13 +600,15 @@ ser = serial.Serial(
 
 # Start Timer thread (Timer is not use)
 timer = TimerThread(ACTIVE=True, INTERVAL=5)
-timer.setDaemon(True)
+timer.daemon = True
+#timer.setDaemon(True)
 timer.start()
 
 # Start UDP Receive hread
 #udp = ServerThread(PORT=8200)
 udp = ServerThread(PORT=udpPort)
-udp.setDaemon(True)
+udp.daemon = True
+#udp.setDaemon(True)
 udp.start()
 
 
