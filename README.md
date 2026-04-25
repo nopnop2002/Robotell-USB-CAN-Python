@@ -105,7 +105,7 @@ FILTER14 ID: 0x01FFFEEE  DLC: 8  Data: 0x00 0x00 0x00 0x00 0x01 0x00 0x00 0x00
 FILTER15 ID: 0x01FFFEEF  DLC: 8  Data: 0xFF 0xFF 0xFF 0xBF 0xFF 0xFF 0xFF 0xFF
 ```
 
-# CAN transmission data
+# Send can data
 This tool accepts data to send via UDP broadcast.   
 Open a new terminal and execute the following command:   
 ```
@@ -117,7 +117,7 @@ Please change if necessary.
 $ ./transmit.sh
 ```
 
-# CAN receive filter settings(Standard Frame)
+# Set receive filter of Standard Frame
 This tool accepts filtering of standard frames via UDP broadcast.   
 Open a new terminal and execute the following command:   
 ```
@@ -129,7 +129,7 @@ Please change if necessary.
 $ ./stdmask.sh
 ```
 
-# CAN receive filter settings(Extended Frame)
+# Set receive filter of Extended Frame
 This tool accepts filtering of extended frames via UDP broadcast.   
 Open a new terminal and execute the following command:   
 ```
@@ -139,6 +139,14 @@ $ vi extmask.sh
 Please change if necessary.
 
 $ ./extmask.sh
+```
+
+# Reset all receive filter
+This tool accepts initializing filtering via UDP broadcast.   
+Open a new terminal and execute the following command:   
+```
+$ chmod 777 resetmask.sh
+$ ./resetmask.sh
 ```
 
 # Running on Ubuntu 24.04.4
