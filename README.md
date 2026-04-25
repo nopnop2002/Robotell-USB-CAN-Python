@@ -106,7 +106,7 @@ FILTER15 ID: 0x01FFFEEF  DLC: 8  Data: 0xFF 0xFF 0xFF 0xBF 0xFF 0xFF 0xFF 0xFF
 ```
 
 # CAN transmission data
-This tool accepts data to send via UDP Broadcast.   
+This tool accepts data to send via UDP broadcast.   
 Open a new terminal and execute the following command:   
 ```
 $ chmod 777 transmit.sh
@@ -118,7 +118,7 @@ $ ./transmit.sh
 ```
 
 # CAN receive filter settings(Standard Frame)
-This tool accepts filter to set via UDP Broadcast.   
+This tool accepts filtering of standard frames via UDP broadcast.
 Open a new terminal and execute the following command:   
 ```
 $ chmod 777 stdmask.sh
@@ -130,7 +130,7 @@ $ ./stdmask.sh
 ```
 
 # CAN receive filter settings(Extended Frame)
-This tool accepts filter to set via UDP Broadcast.   
+This tool accepts filtering of extended frames via UDP broadcast.
 Open a new terminal and execute the following command:   
 ```
 $ chmod 777 extmask.sh
