@@ -19,9 +19,9 @@ class TimerThread(threading.Thread):
 
     def run(self):
         while True:
+            time.sleep(self.interval)
             #print("Timer={} active={}".format(time.time(), self.active))
             if self.active == True: self.timerFlag = True
-            time.sleep(self.interval)
 
 # UDP Receive Thread
 class ServerThread(threading.Thread):
@@ -319,7 +319,8 @@ def setFilterMsg(filterIndex, filterId, filterMask, frameType, filterStatus):
     sendData.append(crc)
     sendData.append(0x55)
     sendData.append(0x55)
-    logging.debug("sendData={}".format(sendData))
+    #logging.debug("sendData={}".format(sendData))
+    loggingFrame("sendData=", sendData)
     return sendData
 
 def setTransmitMsg(id, rtr, ext, len, buf):
@@ -381,7 +382,8 @@ def setTransmitMsg(id, rtr, ext, len, buf):
     sendData.append(0x55)
     sendData.append(0x55)
     #sendData.append(0xF0)
-    logging.debug("sendData={}".format(sendData))
+    #logging.debug("sendData={}".format(sendData))
+    loggingFrame("sendData=", sendData)
     return sendData
 
 # https://qiita.com/mml/items/ccc66ecc46d8299b3346
@@ -597,14 +599,13 @@ ser = serial.Serial(
       #rtscts = 0,
       )
 
-
 # Start Timer thread (Timer is not use)
 timer = TimerThread(ACTIVE=True, INTERVAL=5)
 timer.daemon = True
 #timer.setDaemon(True)
 timer.start()
 
-# Start UDP Receive hread
+# Start UDP Receive thread
 #udp = ServerThread(PORT=8200)
 udp = ServerThread(PORT=udpPort)
 udp.daemon = True
@@ -697,7 +698,7 @@ while True:
             logging.debug("frameData={}".format(frameData))
             sendData = setTransmitMsg(frameId, frameRequest, frameType, frameLength, frameData)
             sendMsg(sendData)
-            logging.info("Transmit={}".format(sendData))
+            #logging.info("Transmit={}".format(sendData))
             loggingFrame("Transmit=", sendData)
             udp.interrupt = False
 
@@ -712,7 +713,7 @@ while True:
             sendData = setFilterMsg(filterIndex, filterId, filterMask, frameType, filterStatus)
             if (len(sendData) > 0):
                 sendMsg(sendData)
-                logging.info("Mask={}".format(sendData))
+                #logging.info("Mask={}".format(sendData))
                 loggingFrame("Mask=", sendData)
             udp.interrupt = False
 
