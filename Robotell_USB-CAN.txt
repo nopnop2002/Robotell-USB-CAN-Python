@@ -309,7 +309,7 @@ c=0x55
 [11] 0x0F : (Mask >> 8) & 0xFF
 [12] 0x00 : (Mask >> 16) & 0xFF
 [13] 0x00 : (Mask >> 24) & 0xFF
-[14] 0x08 : Frame Data jLength
+[14] 0x08 : Frame Data Length
 [15] 0xFF : System Message(Must be 0xFF)
 [16] 0x01 : Must be Extended Frame
 [17] 0x00 : Must be 0(0:Set/1:Read)
@@ -361,7 +361,7 @@ c=0x55
 [10] 0x00 : Frame Data[4]
 [11] 0x00 : Frame Data[5]
 [12] 0x00 : Frame Data[6]
-[13] 0x00 : Frame Data[70]
+[13] 0x00 : Frame Data[7]
 [14] c=04 : Frame Data Length
 [15] c=00 : Message Type (00:Can Message/FF:System Message like BAUDRATE set)
 [16] 0x01 : CAN Frame Type (0:Standard/1:Extended)
